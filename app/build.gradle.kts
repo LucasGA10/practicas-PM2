@@ -51,6 +51,16 @@ android {
     }
 }
 
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "com.intellij" && requested.name == "annotations") {
+            useTarget("org.jetbrains:annotations:23.0.0") // O la versión más reciente que tengas
+            // O podrías intentar excluirla completamente si org.jetbrains:annotations:23.0.0
+            // ya satisface todas las necesidades. Pero forzar la versión es más seguro.
+        }
+    }
+}
+
 dependencies {
 
     // Base
@@ -62,6 +72,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.litert.support.api)
+    implementation(libs.androidx.room.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -69,6 +81,12 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.coil.compose)
+    implementation(libs.icons.material.core)
+    implementation(libs.icons.material.extended)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+
 
     // Dagger + Hilt
     implementation(libs.google.dagger.hilt.android)

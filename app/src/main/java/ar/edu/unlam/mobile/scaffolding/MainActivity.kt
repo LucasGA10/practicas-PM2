@@ -5,10 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -21,8 +17,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import ar.edu.unlam.mobile.scaffolding.ui.components.BottomBar
 import ar.edu.unlam.mobile.scaffolding.ui.screens.HomeScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.PreparationScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.RecipeScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.UserScreen
-import ar.edu.unlam.mobile.scaffolding.ui.theme.ScaffoldingV2Theme
+import ar.edu.unlam.mobile.scaffolding.ui.theme.DietappV2Theme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -30,7 +28,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            ScaffoldingV2Theme {
+            DietappV2Theme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -43,6 +41,13 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+object NavDestinations {
+    const val RECIPE_LIST_ROUTE = "Recipes"
+    const val PREPARATION_ROUTE_PREFIX = "Preparation_screen" // Prefijo para la ruta
+    const val RECIPE_ARGUMENT = "recipeId" // Nombre del argumento
+    const val PREPARATION_ROUTE_WITH_ARG = "$PREPARATION_ROUTE_PREFIX/{$RECIPE_ARGUMENT}" // Ruta completa con el argumento
+}
+
 @Composable
 fun MainScreen() {
     // Controller es el elemento que nos permite navegar entre pantallas. Tiene las acciones
@@ -51,15 +56,13 @@ fun MainScreen() {
     val controller = rememberNavController()
     Scaffold(
         bottomBar = { BottomBar(controller = controller) },
-        floatingActionButton = {
-            IconButton(onClick = { controller.navigate("home") }) {
-                Icon(Icons.Filled.Home, contentDescription = "Home")
-            }
-        },
     ) { paddingValue ->
         // NavHost es el componente que funciona como contenedor de los otros componentes que
         // podrán ser destinos de navegación.
-        NavHost(navController = controller, startDestination = "home") {
+        NavHost(
+            navController = controller,
+            startDestination = "home",
+            modifier = Modifier.padding(paddingValue),) {
             // composable es el componente que se usa para definir un destino de navegación.
             // Por parámetro recibe la ruta que se utilizará para navegar a dicho destino.
             composable("home") {
@@ -72,6 +75,19 @@ fun MainScreen() {
             ) { navBackStackEntry ->
                 val id = navBackStackEntry.arguments?.getString("id") ?: "1"
                 UserScreen(userId = id)
+            }
+            composable(NavDestinations.RECIPE_LIST_ROUTE) {
+                RecipeScreen(navController = controller)
+            }
+            composable(
+                route = NavDestinations.PREPARATION_ROUTE_WITH_ARG,
+                arguments = listOf(
+                    navArgument(NavDestinations.RECIPE_ARGUMENT) { // NavDestinations.RECIPE_ARGUMENT es "recipeId"
+                        type = NavType.IntType // El tipo se define directamente aquí
+                    }
+                )
+            ) { // El backStackEntry ya no se usa directamente aquí si el ViewModel lo maneja
+                PreparationScreen(navController = controller)
             }
         }
     }
