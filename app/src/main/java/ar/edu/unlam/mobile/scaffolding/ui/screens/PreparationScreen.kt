@@ -121,6 +121,7 @@ fun PreparationScreen(
                             modifier = Modifier
                                 .align(Alignment.BottomStart) // Título a la izquierda
                                 .padding(end = 48.dp) // Deja espacio para el botón de corazón
+                                .padding(bottom = 7.dp)
                         )
 
                         // Botón de Corazón (Favorito)

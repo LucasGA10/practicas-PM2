@@ -7,18 +7,26 @@ import ar.edu.unlam.mobile.scaffolding.data.datasources.local.recipes.Category
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.recipes.Difficulty
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.recipes.Recipe
 import ar.edu.unlam.mobile.scaffolding.data.repositories.IngredientsRepository.getIngredients
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject
 import javax.inject.Singleton
+
+interface RecipesRepositoryInterface {
+    fun getRecipeById(id: Int): Recipe?
+    suspend fun updateRecipe(recipe: Recipe)
+    fun getRecipes(): Flow<List<Recipe>>
+}
 
 @Singleton
 class RecipesRepository
 @Inject
-constructor() {
+constructor(): RecipesRepositoryInterface {
     private val recipes = mutableListOf<Recipe>()
     private val ingredients = getIngredients()
 
     private fun getIngredients(name: String): Ingredient {
-        var ingredient: Ingredient = Ingredient(0, "No se encotro el ingrediente", "", IngredientType.Otros)
+        var ingredient: Ingredient = Ingredient("No se encotro el ingrediente", "", IngredientType.Otros)
         ingredients.forEach {
             if (it.name == name) {
                 ingredient = it
@@ -27,15 +35,19 @@ constructor() {
         return ingredient
     }
 
-    fun getRecipeById(id: Int): Recipe? {
+    override fun getRecipeById(id: Int): Recipe? {
         return recipes.find { it.id == id }
     }
 
-    fun updateRecipe(updatedRecipe: Recipe) {
-        val index = recipes.indexOfFirst { it.id == updatedRecipe.id }
+    override suspend fun updateRecipe(recipe: Recipe) {
+        val index = recipes.indexOfFirst { it.id == recipe.id }
         if (index != -1) {
-            recipes[index] = updatedRecipe
+            recipes[index] = recipe
         }
+    }
+
+    override fun getRecipes(): Flow<List<Recipe>> {
+        return flowOf(recipes)
     }
 
     init {
@@ -54,7 +66,7 @@ constructor() {
                     UsedIngredient(getIngredients("Leche vegetal"), "2 tazas"),
                     UsedIngredient(getIngredients("Proteína en polvo"), "1 scoop"),
                     UsedIngredient(getIngredients("Banana"), "1 unidad"),
-                    UsedIngredient(getIngredients("Frutillas frescas"), "1/2 taza"),
+                    UsedIngredient(getIngredients("Frutillas"), "1/2 taza"),
                     UsedIngredient(getIngredients("Semillas de chía"), "1 cucharadita"),
                     UsedIngredient(getIngredients("Miel o agave"), "1 cucharada")
                 ),
@@ -87,8 +99,9 @@ constructor() {
                     UsedIngredient(getIngredients("Palta"), "1 unidad"),
                     UsedIngredient(getIngredients("Aceite de oliva"), "2 cucharadas"),
                     UsedIngredient(getIngredients("Jugo de limón"), "2 cucharadas"),
-                    UsedIngredient(getIngredients("Sal y pimienta"), "al gusto"),
-                    UsedIngredient(getIngredients("Perejil fresco"), "2 cucharadas")
+                    UsedIngredient(getIngredients("Sal"), "al gusto"),
+                    UsedIngredient(getIngredients("Pimienta"), "al gusto"),
+                    UsedIngredient(getIngredients("Perejil"), "2 cucharadas")
                 ),
                 instructions = listOf(
                     "Cocina la quinoa según las instrucciones del paquete y deja enfriar.",
@@ -121,7 +134,8 @@ constructor() {
                 UsedIngredient(getIngredients("Aceite de oliva"), "1 cucharada"),
                 UsedIngredient(getIngredients("Ajo en polvo"), "1 cucharadita"),
                 UsedIngredient(getIngredients("Romero seco"), "1 cucharadita"),
-                UsedIngredient(getIngredients("Sal y pimienta"), "al gusto")
+                UsedIngredient(getIngredients("Sal"), "al gusto"),
+                UsedIngredient(getIngredients("Pimienta"), "al gusto"),
             ),
             instructions = listOf(
                 "Precalienta el horno a 200°C.",
@@ -593,7 +607,4 @@ constructor() {
 
     }
 
-    fun getRecipes(): List<Recipe> {
-        return recipes
-    }
 }

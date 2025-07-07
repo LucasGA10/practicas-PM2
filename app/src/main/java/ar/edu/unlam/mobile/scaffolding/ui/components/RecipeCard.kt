@@ -146,8 +146,8 @@ fun RecipeCardPreview(){
             cookingTime = 10.0,
             portions = 2,
             usedIngredients = listOf(
-                UsedIngredient(Ingredient(1, "Aceite de oliva", "https://example.com/aceite-oliva.jpg", IngredientType.Aceite), "1 taza"),
-                UsedIngredient(Ingredient(2, "Aceite vegetal", "https://example.com/aceite-vegetal.jpg", IngredientType.Aceite), "2 tazas"),
+                UsedIngredient(Ingredient("Aceite de oliva", "https://example.com/aceite-oliva.jpg", IngredientType.Aceite), "1 taza"),
+                UsedIngredient(Ingredient("Aceite vegetal", "https://example.com/aceite-vegetal.jpg", IngredientType.Aceite), "2 tazas"),
             ),
             instructions = listOf(
                 "Calienta la leche vegetal en una olla a fuego medio.",

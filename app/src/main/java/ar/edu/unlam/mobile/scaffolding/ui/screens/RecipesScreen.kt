@@ -41,12 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.recipes.Category
-
-object NavDestinations {
-    const val RECIPE_ID_ARG = "recipeId"
-}
 
 @OptIn(ExperimentalLayoutApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -154,7 +149,8 @@ fun RecipeScreen(
                     items(recipes, key = { it.id }) { recipe ->
                         RecipeCard(
                             recipe = recipe,
-                            onFavoriteClick = { /* viewModel.toggleFavorite(it) */ },
+                            onFavoriteClick = { recipeToToggle ->
+                                viewModel.toggleFavorite(recipeToToggle.id) },
                             onClickAction = {
                                 navController.navigate("Preparation_screen/${recipe.id}")
                             }
