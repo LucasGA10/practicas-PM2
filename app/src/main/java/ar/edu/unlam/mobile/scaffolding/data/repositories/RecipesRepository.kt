@@ -26,7 +26,7 @@ constructor(): RecipesRepositoryInterface {
     private val ingredients = getIngredients()
 
     private fun getIngredients(name: String): Ingredient {
-        var ingredient: Ingredient = Ingredient("No se encotro el ingrediente", "", IngredientType.Otros)
+        var ingredient = Ingredient("No se encotro el ingrediente", "https://thefoodtech.com/wp-content/uploads/2020/12/ingredientes-saludables.jpg", IngredientType.Otros)
         ingredients.forEach {
             if (it.name == name) {
                 ingredient = it
@@ -55,7 +55,7 @@ constructor(): RecipesRepositoryInterface {
             Recipe(
                 id = 1,
                 name = "Avena Proteica con Frutas",
-                imageUrl = "https://example.com/avena.jpg",
+                imageUrl = "https://tse4.mm.bing.net/th/id/OIP.xjYgFHrbD-GtOHv3fqYo-QHaEH?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
                 category = Category.Desayuno,
                 difficulty = Difficulty.Fácil,
                 preparationTime = 5.0,
@@ -85,7 +85,7 @@ constructor(): RecipesRepositoryInterface {
             Recipe(
                 id = 2,
                 name = "Ensalada de Quinoa con Garbanzos",
-                imageUrl = "https://example.com/ensalada-quinoa.jpg",
+                imageUrl = "https://tse3.mm.bing.net/th/id/OIP.-ZPYUGpo7U0-v_ERH8VRsgHaFQ?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
                 category = Category.Almuerzo,
                 difficulty = Difficulty.Media,
                 preparationTime = 15.0,
@@ -120,7 +120,7 @@ constructor(): RecipesRepositoryInterface {
             Recipe(
             id = 3,
             name = "Pollo al Horno con Verduras",
-            imageUrl = "https://example.com/pollo-verduras.jpg",
+            imageUrl = "https://tse3.mm.bing.net/th/id/OIP.ThULyvoVe3r52fzWIuSXKAHaE8?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
             category = Category.Cena,
             difficulty = Difficulty.Fácil,
             preparationTime = 10.0,

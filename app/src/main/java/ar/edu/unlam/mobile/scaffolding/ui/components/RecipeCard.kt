@@ -23,9 +23,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.ingredients.Ingredient
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.ingredients.IngredientType
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.ingredients.UsedIngredient
@@ -52,7 +54,7 @@ fun RecipeCard(
             modifier
                 .padding(2.dp)
                 .fillMaxWidth()
-                .padding(vertical = 3.dp),
+                .padding(vertical = 5.dp),
         onClick = { onClickAction() })
     {
         Row(modifier = Modifier.padding(3.dp)) {
@@ -64,6 +66,7 @@ fun RecipeCard(
                         .size(75.dp)
                         .clip(RoundedCornerShape(5.dp))
                         .background(MaterialTheme.colorScheme.secondary),
+                contentScale = ContentScale.Crop
             )
             Spacer(modifier = Modifier.size(5.dp))
 
@@ -78,10 +81,12 @@ fun RecipeCard(
                     ){
                     Text(
                         text = recipe.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.weight(1f).size(26.dp)
+                        style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .size(24.dp)
                     )
-
+                    /*
                     IconButton(
                         onClick = { onFavoriteClick(recipe) },
                         modifier = Modifier
@@ -96,19 +101,20 @@ fun RecipeCard(
                             modifier = Modifier.size(22.dp) // Ajusta el tamaño según necesites
                         )
                     }
+                    */
                 }
 
                 Row{
                     Text(
                         text = recipe.category.toString(),
                         textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.padding(top = 2.dp, bottom = 2.dp)
                         )
                     Spacer(modifier = Modifier.size(10.dp))
                     RatingBar(
                         rating = recipe.rating,
-                        starSize = 16.dp,
+                        starSize = 18.dp,
                         modifier = Modifier
                             .padding(top = 2.dp, bottom = 2.dp)
                             .align(Alignment.CenterVertically),
@@ -118,11 +124,13 @@ fun RecipeCard(
                 Row {
                     Text(
                         text = "${recipe.difficulty} de hacer",
+                        style = MaterialTheme.typography.bodyLarge,
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.size(15.dp))
                     Text(
                         text = "Porciones: ${recipe.portions} ",
+                        style = MaterialTheme.typography.bodyLarge,
                         textAlign = TextAlign.Center
                     )
                 }

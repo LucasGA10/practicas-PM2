@@ -22,7 +22,7 @@ fun RatingBar(
     modifier: Modifier = Modifier,
     rating: Float,
     maxRating: Int = 5,
-    starsColor: Color = MaterialTheme.colorScheme.primary,
+    starsColor: Color = Color.Yellow,
     emptyStarColor: Color = MaterialTheme.colorScheme.outline,
     starSize: Dp = 20.dp // Añadido para consistencia
 ) {
@@ -50,7 +50,7 @@ fun ClickableRatingBar(
     currentRating: Float,
     onRatingChanged: (Float) -> Unit,
     starSize: Dp = 24.dp, // Tamaño de las estrellas
-    starColor: Color = MaterialTheme.colorScheme.primary,
+    starColor: Color = Color.Yellow,
     emptyStarColor: Color = MaterialTheme.colorScheme.outline
 ) {
     Row(
