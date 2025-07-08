@@ -153,7 +153,7 @@ constructor(): RecipesRepositoryInterface {
             Recipe(
                 id = 4,
                 name = "Tostadas de Palta con Huevo",
-                imageUrl = "https://example.com/tostada-palta.jpg",
+                imageUrl = "https://tse4.mm.bing.net/th/id/OIP.VYwSuKdyeJfXNNfl9sPAJgHaEp?rs=1&pid=ImgDetMain&o=7&rm=3",
                 category = Category.Desayuno,
                 difficulty = Difficulty.Fácil,
                 preparationTime = 10.0,
@@ -182,7 +182,7 @@ constructor(): RecipesRepositoryInterface {
             Recipe(
                 id = 5,
                 name = "Bolitas Energéticas de Avena",
-                imageUrl = "https://example.com/bolitas-avena.jpg",
+                imageUrl = "https://tse4.mm.bing.net/th/id/OIP.U-E1DUgaYnIPIG_7xPYXEQHaFj?rs=1&pid=ImgDetMain&o=7&rm=3",
                 category = Category.Snack,
                 difficulty = Difficulty.Fácil,
                 preparationTime = 15.0,
@@ -209,7 +209,7 @@ constructor(): RecipesRepositoryInterface {
             Recipe(
                 id = 6,
                 name = "Wrap Vegetariano de Garbanzos",
-                imageUrl = "https://example.com/wrap-garbanzos.jpg",
+                imageUrl = "https://tse1.explicit.bing.net/th/id/OIP.yrEP8C6M8Zrq6944XL0ubwHaFj?rs=1&pid=ImgDetMain&o=7&rm=3",
                 category = Category.Almuerzo,
                 difficulty = Difficulty.Media,
                 preparationTime = 15.0,
@@ -240,7 +240,7 @@ constructor(): RecipesRepositoryInterface {
             Recipe(
                 id = 7,
                 name = "Bowl de Vegetales y Tofu",
-                imageUrl = "https://example.com/bowl-tofu.jpg",
+                imageUrl = "https://th.bing.com/th/id/R.508bae82c0b59a72fefd385d59a949cd?rik=p7DSIjwHH9J%2bew&riu=http%3a%2f%2f3.bp.blogspot.com%2f-uXU6pLFR6HQ%2fVNZlw8TeQmI%2fAAAAAAAABVI%2fhDqz7lbuMYA%2fs1600%2f20150207_141958.jpg&ehk=NYgwLZlmitFTXMlBB8wLPLN6io9XitqZZCYm%2b4SAyCE%3d&risl=&pid=ImgRaw&r=0",
                 category = Category.Cena,
                 difficulty = Difficulty.Media,
                 preparationTime = 20.0,
@@ -271,7 +271,7 @@ constructor(): RecipesRepositoryInterface {
             Recipe(
                 id = 8,
                 name = "Batatas Asadas con Romero",
-                imageUrl = "https://example.com/batatas-romero.jpg",
+                imageUrl = "https://tse3.mm.bing.net/th/id/OIP.6Crap8Yt4s1zVUoMIxKrLgHaEK?rs=1&pid=ImgDetMain&o=7&rm=3",
                 category = Category.Cena,
                 difficulty = Difficulty.Fácil,
                 preparationTime = 10.0,
@@ -299,7 +299,7 @@ constructor(): RecipesRepositoryInterface {
             Recipe(
                 id = 9,
                 name = "Parfait de Yogur y Frutas",
-                imageUrl = "https://example.com/parfait-frutas.jpg",
+                imageUrl = "https://tse1.mm.bing.net/th/id/OIP.XxyfiEIYCAZayYc1jQ45eAHaHa?rs=1&pid=ImgDetMain&o=7&rm=3",
                 category = Category.Postre,
                 difficulty = Difficulty.Fácil,
                 preparationTime = 10.0,
@@ -325,7 +325,7 @@ constructor(): RecipesRepositoryInterface {
             Recipe(
                 id = 10,
                 name = "Ensalada de Pollo a la Parrilla",
-                imageUrl = "https://example.com/ensalada-pollo.jpg",
+                imageUrl = "https://tse1.mm.bing.net/th/id/OIP.Hc93cGyg1Eqm-X7MJ96zewHaFJ?rs=1&pid=ImgDetMain&o=7&rm=3",
                 category = Category.Almuerzo,
                 difficulty = Difficulty.Fácil,
                 preparationTime = 15.0,
@@ -357,7 +357,7 @@ constructor(): RecipesRepositoryInterface {
             Recipe(
                 id = 11,
                 name = "Salteado de Carne con Verduras",
-                imageUrl = "https://example.com/salteado-carne.jpg",
+                imageUrl = "https://th.bing.com/th/id/R.8a07dfacb414f945e1d0642b04a9c2e1?rik=ugcQVKMnuVWiqQ&pid=ImgRaw&r=0",
                 category = Category.Cena,
                 difficulty = Difficulty.Media,
                 preparationTime = 15.0,
@@ -387,7 +387,7 @@ constructor(): RecipesRepositoryInterface {
             Recipe(
                 id = 12,
                 name = "Medallones de Cerdo con Puré de Coliflor",
-                imageUrl = "https://example.com/cerdo-coliflor.jpg",
+                imageUrl = "https://tse1.explicit.bing.net/th/id/OIP.X60qzCwAHZeLaQMKLcMLxwHaKd?rs=1&pid=ImgDetMain&o=7&rm=3",
                 category = Category.Cena,
                 difficulty = Difficulty.Media,
                 preparationTime = 20.0,
@@ -418,7 +418,7 @@ constructor(): RecipesRepositoryInterface {
             Recipe(
                 id = 13,
                 name = "Guiso de Lentejas",
-                imageUrl = "https://example.com/guiso-lentejas.jpg",
+                imageUrl = "https://tse1.mm.bing.net/th/id/OIP.JF8UHljH1M4-Xo21MozLQgHaFY?rs=1&pid=ImgDetMain&o=7&rm=3",
                 category = Category.Almuerzo,
                 difficulty = Difficulty.Media,
                 preparationTime = 15.0,
@@ -433,7 +433,8 @@ constructor(): RecipesRepositoryInterface {
                     UsedIngredient(getIngredients("Tomate triturado"), "1 taza"),
                     UsedIngredient(getIngredients("Pimentón dulce"), "1 cucharadita"),
                     UsedIngredient(getIngredients("Laurel"), "1 hoja"),
-                    UsedIngredient(getIngredients("Sal y pimienta"), "al gusto"),
+                    UsedIngredient(getIngredients("Pimienta"), "al gusto"),
+                    UsedIngredient(getIngredients("Sal"), "al gusto"),
                     UsedIngredient(getIngredients("Agua"), "cantidad necesaria")
                 ),
                 instructions = listOf(
@@ -452,7 +453,7 @@ constructor(): RecipesRepositoryInterface {
             Recipe(
                 id = 14,
                 name = "Fideos Integrales con Salsa de Tomate y Pollo",
-                imageUrl = "https://example.com/fideos-pollo.jpg",
+                imageUrl = "https://cdn0.recetasgratis.net/es/posts/9/5/6/fideos_con_salsa_de_tomate_41659_600.jpg",
                 category = Category.Almuerzo,
                 difficulty = Difficulty.Fácil,
                 preparationTime = 10.0,
@@ -485,7 +486,7 @@ constructor(): RecipesRepositoryInterface {
             Recipe(
                 id = 15,
                 name = "Omelette de Verduras",
-                imageUrl = "https://example.com/omelette-verduras.jpg",
+                imageUrl = "https://tse4.mm.bing.net/th/id/OIP.DKS0YUgeDJQ3MHn_K45tQQHaD4?rs=1&pid=ImgDetMain&o=7&rm=3",
                 category = Category.Desayuno,
                 difficulty = Difficulty.Fácil,
                 preparationTime = 10.0,
@@ -498,7 +499,8 @@ constructor(): RecipesRepositoryInterface {
                     UsedIngredient(getIngredients("Cebolla"), "1/4 unidad"),
                     UsedIngredient(getIngredients("Pimiento"), "1/4 unidad"),
                     UsedIngredient(getIngredients("Aceite de oliva"), "1 cucharadita"),
-                    UsedIngredient(getIngredients("Sal y pimienta"), "al gusto")
+                    UsedIngredient(getIngredients("Sal"), "al gusto"),
+                    UsedIngredient(getIngredients("Pimienta"), "al gusto"),
                 ),
                 instructions = listOf(
                     "Batí los huevos con la leche, sal y pimienta.",
@@ -515,7 +517,7 @@ constructor(): RecipesRepositoryInterface {
             Recipe(
                 id = 16,
                 name = "Bife a la Plancha con Ensalada Criolla",
-                imageUrl = "https://example.com/bife-ensalada.jpg",
+                imageUrl = "https://zedinaalimentos.com/wp-content/uploads/2024/07/Bife-Angosto-A-La-Plancha.png",
                 category = Category.Almuerzo,
                 difficulty = Difficulty.Fácil,
                 preparationTime = 10.0,
@@ -546,7 +548,7 @@ constructor(): RecipesRepositoryInterface {
             Recipe(
                 id = 17,
                 name = "Humita Light en Olla",
-                imageUrl = "https://example.com/humita-olla.jpg",
+                imageUrl = "https://blog.amigofoods.com/wp-content/uploads/2022/12/humitas-sauces.jpg",
                 category = Category.Cena,
                 difficulty = Difficulty.Media,
                 preparationTime = 15.0,
@@ -576,7 +578,7 @@ constructor(): RecipesRepositoryInterface {
             Recipe(
                 id = 18,
                 name = "Revuelto Gramajo Saludable",
-                imageUrl = "https://example.com/revuelto-gramajo.jpg",
+                imageUrl = "https://th.bing.com/th/id/R.3cd6539401d5e3df0e7acaa30770c2b1?rik=ehEAOVk1%2fEWAdw&pid=ImgRaw&r=0",
                 category = Category.Cena,
                 difficulty = Difficulty.Media,
                 preparationTime = 15.0,
