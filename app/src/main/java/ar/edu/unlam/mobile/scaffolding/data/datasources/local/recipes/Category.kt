@@ -24,4 +24,7 @@ enum class Category {
     Nutritivo,
     Casero,
     Argentina,
+    Pescado,
+    Omega3,
+
 }

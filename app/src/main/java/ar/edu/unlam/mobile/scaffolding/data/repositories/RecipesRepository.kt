@@ -606,7 +606,76 @@ constructor(): RecipesRepositoryInterface {
                 nutritionalValue = 410
             )
         )
-
+        recipes.add(
+            Recipe(
+                id = 19,
+                name = "Salmón en costra de hierbas con puré de arvejas",
+                imageUrl = "https://storage.googleapis.com/fitia_public_images/recipes%2FGR-R-V-00002975_y8h8kqle0t1n02zpii9udk4q_large.jpg",
+                category = Category.Cena,
+                difficulty = Difficulty.Difícil,
+                preparationTime = 25.0,
+                cookingTime = 20.0,
+                portions = 2,
+                usedIngredients =listOf(
+                    UsedIngredient(getIngredients("Salmón"), "2 filetes"),
+                    UsedIngredient(getIngredients("Pan rallado integral"), "1/2 taza"),
+                    UsedIngredient(getIngredients("Hierbas frescas (perejil, tomillo, eneldo)"), "2 cucharadas"),
+                    UsedIngredient(getIngredients("Mostaza"), "1 cucharada"),
+                    UsedIngredient(getIngredients("Ralladura de limón"), "1 cucharadita"),
+                    UsedIngredient(getIngredients("Arvejas"), "1 taza"),
+                    UsedIngredient(getIngredients("Aceite de oliva"), "1 cucharada"),
+                    UsedIngredient(getIngredients("Menta fresca"), "1 cucharadita"),
+                    UsedIngredient(getIngredients("Sal"), "al gusto"),
+                    UsedIngredient(getIngredients("Pimienta"), "al gusto")
+                ),
+                instructions = listOf(
+                    "Precalentar el horno a 200°C.",
+                    "Mezclar pan rallado integral con hierbas frescas picadas, ralladura de limón, sal y pimienta.",
+                    "Cubrir los filetes de salmón con una capa delgada de mostaza y luego presionar la mezcla de hierbas sobre ellos.",
+                    "Hornear el salmón durante 15-20 minutos.",
+                    "Mientras tanto, cocinar las arvejas en agua hirviendo por 5 minutos y luego triturarlas con aceite de oliva, menta, sal y pimienta para hacer el puré.",
+                    "Servir el salmón sobre una cama de puré de arvejas."
+                ),
+                note = "Para una textura más crocante, se puede gratinar el salmón unos minutos al final.",
+                tags = listOf(Category.Cena, Category.Saludable, Category.Pescado, Category.Omega3, Category.Proteico,),
+                nutritionalValue = 430
+            )
+        )
+        recipes.add(
+            Recipe(
+                id = 20,
+                name = "Lasaña de berenjenas con ricota y espinaca",
+                imageUrl = "https://comedera.com/wp-content/uploads/sites/9/2023/10/shutterstock_2143259473.jpg",
+                category = Category.Almuerzo,
+                difficulty = Difficulty.Difícil,
+                preparationTime = 30.0,
+                cookingTime = 40.0,
+                portions = 4,
+                usedIngredients = listOf(
+                    UsedIngredient(getIngredients("Berenjenas"), "2 unidades"),
+                    UsedIngredient(getIngredients("Ricota magra"), "1 taza"),
+                    UsedIngredient(getIngredients("Espinaca fresca"), "2 tazas"),
+                    UsedIngredient(getIngredients("Huevo"), "1 unidad"),
+                    UsedIngredient(getIngredients("Nuez moscada"), "1/4 cucharadita"),
+                    UsedIngredient(getIngredients("Ajo"), "1 diente"),
+                    UsedIngredient(getIngredients("Salsa de tomate"), "1 taza"),
+                    UsedIngredient(getIngredients("Queso rallado bajo en grasa"), "1/2 taza"),
+                    UsedIngredient(getIngredients("Sal"), "al gusto"),
+                    UsedIngredient(getIngredients("Pimienta"), "al gusto")
+                ),
+                instructions = listOf(
+                    "Cortar las berenjenas en láminas finas, salarlas y dejarlas reposar 15 minutos.",
+                    "Saltear la espinaca con ajo hasta que reduzca su volumen, escurrir y mezclar con ricota, nuez moscada y huevo.",
+                    "Secar las berenjenas y grillarlas o cocinarlas al horno.",
+                    "Armar la lasaña intercalando capas de berenjena, mezcla de ricota y salsa de tomate casera.",
+                    "Terminar con queso rallado por encima y hornear 30-40 minutos a 180°C.",
+                    "Dejar reposar 10 minutos antes de servir."
+                ),
+                note = "Podés preparar la salsa con tomates naturales para una versión más fresca.",
+                tags = listOf(Category.Almuerzo, Category.Saludable, Category.Vegetariano, Category.Horno, Category.Proteico),
+                nutritionalValue = 520
+            )
+        )
     }
 
 }
