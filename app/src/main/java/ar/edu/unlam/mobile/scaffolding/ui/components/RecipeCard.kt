@@ -86,7 +86,7 @@ fun RecipeCard(
                             .weight(1f)
                             .size(24.dp)
                     )
-                    /*
+
                     IconButton(
                         onClick = { onFavoriteClick(recipe) },
                         modifier = Modifier
@@ -101,7 +101,7 @@ fun RecipeCard(
                             modifier = Modifier.size(22.dp) // Ajusta el tamaño según necesites
                         )
                     }
-                    */
+
                 }
 
                 Row{
