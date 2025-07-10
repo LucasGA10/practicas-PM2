@@ -18,6 +18,9 @@ composeMaterialIcons = "1.6.7"
 litertSupportApi = "1.4.0"
 kotlinx-coroutines = "1.7.3"
 roomCompiler = "2.7.2"
+gson = "2.10.1"
+engageCore = "1.5.8"
+pagingCommonAndroid = "3.3.6"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -47,6 +50,12 @@ litert-support-api = { group = "com.google.ai.edge.litert", name = "litert-suppo
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomCompiler" }
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomCompiler" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomCompiler" }
+androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "roomCompiler" }
+engage-core = { group = "com.google.android.engage", name = "engage-core", version.ref = "engageCore" }
+google-gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+androidx-paging-common-android = { group = "androidx.paging", name = "paging-common-android", version.ref = "pagingCommonAndroid" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

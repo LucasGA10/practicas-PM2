@@ -74,6 +74,11 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.litert.support.api)
     implementation(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.google.gson)
+    implementation(libs.engage.core)
+    implementation(libs.androidx.paging.common.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -86,11 +91,13 @@ dependencies {
     implementation(libs.icons.material.extended)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
-
+    implementation("com.google.accompanist:accompanist-pager:0.30.1")
+    implementation(files("libs/homescreen.aar"))
 
     // Dagger + Hilt
     implementation(libs.google.dagger.hilt.android)
     ksp(libs.google.dagger.hilt.android.compiler)
+    ksp(libs.androidx.room.compiler)
     implementation(libs.google.dagger.hilt.android.testing)
     implementation(libs.androidx.hilt.navigation.compose)
     androidTestImplementation(libs.google.dagger.hilt.android.testing)

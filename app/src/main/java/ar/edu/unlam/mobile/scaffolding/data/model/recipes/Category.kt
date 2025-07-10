@@ -1,4 +1,4 @@
-package ar.edu.unlam.mobile.scaffolding.data.datasources.local.recipes
+package ar.edu.unlam.mobile.scaffolding.data.model.recipes
 
 enum class Category {
     // Tipo de receta
@@ -26,5 +26,4 @@ enum class Category {
     Argentina,
     Pescado,
     Omega3,
-
 }

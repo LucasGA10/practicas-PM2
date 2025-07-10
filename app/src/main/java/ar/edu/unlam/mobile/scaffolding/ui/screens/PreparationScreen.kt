@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -32,8 +31,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
-import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -60,7 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import ar.edu.unlam.mobile.scaffolding.data.datasources.local.ingredients.UsedIngredient
+import ar.edu.unlam.mobile.scaffolding.data.model.ingredients.UsedIngredient
 import ar.edu.unlam.mobile.scaffolding.ui.components.ClickableRatingBar
 import ar.edu.unlam.mobile.scaffolding.ui.components.RatingBar
 import ar.edu.unlam.mobile.scaffolding.ui.components.TopBar
@@ -71,7 +68,6 @@ fun PreparationScreen(
     viewModel: PreparationViewModel = hiltViewModel(),
     navController: NavController,
 ) {
-
     val recipe by viewModel.recipe.collectAsState()
     var ingredientsVisible by remember { mutableStateOf(true) }
 
@@ -87,69 +83,77 @@ fun PreparationScreen(
         mutableFloatStateOf(recipe?.rating ?: 0f)
     }
     val onSubmitRating: (Int, Float) -> Unit = { recipeId, newRating ->
-        viewModel.updateRecipeRating(recipeId , newRating)
+        viewModel.updateRecipeRating(recipeId, newRating)
     }
 
     Scaffold(
-        topBar = { TopBar("Preparación", back) }
+        topBar = { TopBar("Preparación", back) },
     ) { paddingValues ->
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
         ) {
             item {
                 Box( // Box principal para la cabecera de la imagen
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp) // Altura del contenedor general
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(200.dp) // Altura del contenedor general
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
                 ) {
                     AsyncImage(
                         model = recipe?.imageUrl,
                         contentDescription = "Fondo difuminado de la receta", // Descripción diferente
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .blur(radius = 24.dp), // Ajusta el radio del blur
-                        contentScale = ContentScale.Crop // Recorta para llenar
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .blur(radius = 24.dp),
+                        // Ajusta el radio del blur
+                        contentScale = ContentScale.Crop, // Recorta para llenar
                     )
                     AsyncImage(
                         model = recipe?.imageUrl,
                         contentDescription = recipe?.name,
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        contentScale = ContentScale.Fit
+                        modifier =
+                            Modifier
+                                .fillMaxSize(),
+                        contentScale = ContentScale.Fit,
                     )
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color.Black.copy(alpha = 0.3f)) // Fondo semitransparente para legibilidad
-                            .align(Alignment.BottomCenter) // Alinea este Box en la parte inferior del Box padre
-                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .background(Color.Black.copy(alpha = 0.3f)) // Fondo semitransparente para legibilidad
+                                .align(Alignment.BottomCenter) // Alinea este Box en la parte inferior del Box padre
+                                .padding(horizontal = 12.dp, vertical = 8.dp),
                     ) {
                         Text(
-                            text = recipe?.name?: "Cargando título...",
+                            text = recipe?.name ?: "Cargando título...",
                             color = Color.White,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier
-                                .align(Alignment.BottomStart)
-                                .padding(end = 48.dp)
-                                .padding(bottom = 7.dp)
+                            modifier =
+                                Modifier
+                                    .align(Alignment.BottomStart)
+                                    .padding(end = 48.dp)
+                                    .padding(bottom = 7.dp),
                         )
                         // Botón de Corazón (Favorito)
                         recipe?.let { recipe -> // Solo muestra el botón si la receta está cargada
                             IconButton(
                                 onClick = { onToggleFavorite(recipe.id) }, // Llama a la función del ViewModel
-                                modifier = Modifier
-                                    .align(Alignment.CenterEnd) // Corazón a la derecha
-                                    .size(40.dp) // Tamaño del área clickeable del botón
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.CenterEnd) // Corazón a la derecha
+                                        .size(40.dp), // Tamaño del área clickeable del botón
                             ) {
                                 Icon(
                                     imageVector = if (recipe.isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                                     contentDescription = if (recipe.isFavorite) "Quitar de favoritos" else "Añadir a favoritos",
                                     tint = if (recipe.isFavorite) Color.Red else Color.White, // Color del corazón
-                                    modifier = Modifier.size(28.dp) // Tamaño del icono en sí
+                                    modifier = Modifier.size(28.dp), // Tamaño del icono en sí
                                 )
                             }
                         }
@@ -163,23 +167,22 @@ fun PreparationScreen(
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween, // Esto es clave
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         // Porciones (a la izquierda)
                         recipe?.portions?.let { porciones ->
                             Text(
                                 text = "Porciones: $porciones",
                                 style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.SemiBold,
                             )
                         } ?: Spacer(modifier = Modifier.weight(1f)) // Ocupa espacio si no hay porciones para mantener el rating a la derecha
-
 
                         // Rating (a la derecha)
                         recipe?.rating?.let { ratingValue ->
                             RatingBar(
                                 rating = ratingValue,
-                                starSize = 20.dp
+                                starSize = 20.dp,
                             )
                         }
                     }
@@ -187,35 +190,36 @@ fun PreparationScreen(
                     HorizontalDivider(
                         modifier = Modifier.padding(top = 12.dp),
                         thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
                     )
                 }
             }
 
             item { Spacer(modifier = Modifier.height(16.dp)) }
 
-            //Lista de ingredientes
+            // Lista de ingredientes
             item {
                 ExpandableSection(
                     title = "Ingredientes",
                     isVisible = ingredientsVisible,
-                    onHeaderClick = { ingredientsVisible = !ingredientsVisible }
+                    onHeaderClick = { ingredientsVisible = !ingredientsVisible },
                 ) {
                     recipe?.usedIngredients?.takeIf { it.isNotEmpty() }
                         ?.let { currentUsedIngredients ->
                             val usedIngredientPairs = currentUsedIngredients.chunked(2)
 
                             Column(
-                                modifier = Modifier.padding(
-                                    horizontal = 8.dp,
-                                    vertical = 8.dp
-                                ),
-                                verticalArrangement = Arrangement.spacedBy(8.dp) // Espacio entre filas de Cards
+                                modifier =
+                                    Modifier.padding(
+                                        horizontal = 8.dp,
+                                        vertical = 8.dp,
+                                    ),
+                                verticalArrangement = Arrangement.spacedBy(8.dp), // Espacio entre filas de Cards
                             ) {
                                 usedIngredientPairs.forEach { pair ->
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp) // Espacio entre Cards en una fila
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp), // Espacio entre Cards en una fila
                                     ) {
                                         // Card para el primer ingrediente del par
                                         Box(modifier = Modifier.weight(1f)) {
@@ -235,7 +239,7 @@ fun PreparationScreen(
                             }
                         } ?: Text(
                         "No hay ingredientes disponibles.",
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     )
                 }
             }
@@ -245,33 +249,34 @@ fun PreparationScreen(
 
                 item {
                     Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp) // Padding lateral para la caja del consejo
-                            .clip(RoundedCornerShape(8.dp)) // Esquinas redondeadas para la caja
-                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)) // Fondo gris claro
-                            .padding(all = 12.dp) // Padding interno de la caja
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp) // Padding lateral para la caja del consejo
+                                .clip(RoundedCornerShape(8.dp)) // Esquinas redondeadas para la caja
+                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)) // Fondo gris claro
+                                .padding(all = 12.dp), // Padding interno de la caja
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Filled.Lightbulb, // Icono de bombilla
                                 contentDescription = "Consejo",
                                 tint = MaterialTheme.colorScheme.primary, // Color del icono
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(20.dp),
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "Consejo:",
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = tipText,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -284,7 +289,7 @@ fun PreparationScreen(
                     text = "Pasos de Preparación",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 )
             }
 
@@ -294,38 +299,41 @@ fun PreparationScreen(
                 item {
                     Text(
                         text = "No hay instrucciones disponibles.",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 4.dp),
                     )
                 }
             } else {
                 itemsIndexed(steps) { index, instruction ->
                     // Columna para cada paso completo, para aplicar padding y la línea divisoria
                     Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            // AUMENTAR AQUÍ LA SEPARACIÓN VERTICAL ENTRE PASOS
-                            .padding(vertical = 14.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                // AUMENTAR AQUÍ LA SEPARACIÓN VERTICAL ENTRE PASOS
+                                .padding(vertical = 14.dp),
                     ) {
                         Row(
-                            verticalAlignment = Alignment.Top
+                            verticalAlignment = Alignment.Top,
                         ) {
                             // Caja para el número del paso
                             Box(
                                 contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                    .defaultMinSize(minWidth = 70.dp) // Asegura un ancho mínimo para "Paso XX"
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                                    .padding(horizontal = 8.dp, vertical = 6.dp) // Padding interno de la caja del número
+                                modifier =
+                                    Modifier
+                                        .defaultMinSize(minWidth = 70.dp) // Asegura un ancho mínimo para "Paso XX"
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                                        .padding(horizontal = 8.dp, vertical = 6.dp), // Padding interno de la caja del número
                             ) {
                                 Text(
                                     text = "Paso ${index + 1}",
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 14.sp
+                                    fontSize = 14.sp,
                                 )
                             }
 
@@ -334,7 +342,7 @@ fun PreparationScreen(
                             Text(
                                 text = instruction,
                                 style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
                             )
                         }
 
@@ -343,7 +351,7 @@ fun PreparationScreen(
                             HorizontalDivider(
                                 modifier = Modifier.padding(top = 16.dp), // Aumenta el espacio sobre la línea divisoria
                                 thickness = 1.dp,
-                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
                             )
                         }
                     }
@@ -352,19 +360,20 @@ fun PreparationScreen(
 
             item { Spacer(modifier = Modifier.height(24.dp)) } // Más espacio antes de esta sección
 
-            //Puntuación de la receta
+            // Puntuación de la receta
             item {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally // Centra el contenido de la columna
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally, // Centra el contenido de la columna
                 ) {
                     Text(
                         text = "¿Qué te pareció la receta?",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(bottom = 8.dp)
+                        modifier = Modifier.padding(bottom = 8.dp),
                     )
 
                     // Estrellas clickeables para nuevo rating
@@ -380,7 +389,7 @@ fun PreparationScreen(
                                 onSubmitRating(id, newRating)
                             }
                         },
-                        starSize = 36.dp // Estrellas un poco más grandes para facilitar el clic
+                        starSize = 36.dp, // Estrellas un poco más grandes para facilitar el clic
                     )
 
                     // Opcional: Botón para confirmar el rating
@@ -397,44 +406,43 @@ fun PreparationScreen(
                     ) {
                         Text("Enviar Calificación")
                     }
-                    */
+                     */
                 }
             }
 
             item { Spacer(modifier = Modifier.height(16.dp)) } // Espacio al final
-
-
         }
     }
 }
-
 
 @Composable
 fun ExpandableSection(
     title: String,
     isVisible: Boolean,
     onHeaderClick: () -> Unit,
-    content: @Composable () -> Unit // Contenido de la sección como un slot Composable
+    content: @Composable () -> Unit, // Contenido de la sección como un slot Composable
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onHeaderClick) // Hace que toda la fila del encabezado sea clickeable
-                .padding(vertical = 12.dp, horizontal = 16.dp), // Padding para el encabezado
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onHeaderClick) // Hace que toda la fila del encabezado sea clickeable
+                    .padding(vertical = 12.dp, horizontal = 16.dp),
+            // Padding para el encabezado
             horizontalArrangement = Arrangement.SpaceBetween, // Separa el título del ícono
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
                 // modifier = Modifier.weight(1f) // Opcional: si quieres que el texto ocupe más espacio
             )
             Icon(
                 imageVector = if (isVisible) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
                 contentDescription = if (isVisible) "Colapsar $title" else "Expandir $title",
-                tint = MaterialTheme.colorScheme.primary // Opcional: para darle color al ícono
+                tint = MaterialTheme.colorScheme.primary, // Opcional: para darle color al ícono
             )
         }
 
@@ -442,16 +450,18 @@ fun ExpandableSection(
         AnimatedVisibility(
             visible = isVisible,
             // Modifica aquí la duración de las animaciones
-            enter = fadeIn(animationSpec = tween(durationMillis = 100)) +
+            enter =
+                fadeIn(animationSpec = tween(durationMillis = 100)) +
                     slideInVertically(
                         animationSpec = tween(durationMillis = 150),
-                        initialOffsetY = { fullHeight -> -fullHeight / 4 }
+                        initialOffsetY = { fullHeight -> -fullHeight / 4 },
                     ),
-            exit = fadeOut(animationSpec = tween(durationMillis = 100)) +
+            exit =
+                fadeOut(animationSpec = tween(durationMillis = 100)) +
                     slideOutVertically(
                         animationSpec = tween(durationMillis = 150),
-                        targetOffsetY = { fullHeight -> -fullHeight / 4 }
-                    )
+                        targetOffsetY = { fullHeight -> -fullHeight / 4 },
+                    ),
         ) {
             Column {
                 content()
@@ -465,16 +475,18 @@ fun IngredientCard(usedIngredient: UsedIngredient) {
     // Puedes usar Card o ElevatedCard para diferentes efectos visuales
     ElevatedCard( // O Card()
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp) // Sombra para ElevatedCard
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), // Sombra para ElevatedCard
     ) {
         Column {
             AsyncImage(
                 model = usedIngredient.ingredient.imageUrl,
                 contentDescription = "Imagen de ${usedIngredient.ingredient.name}",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16f / 9f), // O la relación de aspecto que prefieras para la imagen
-                contentScale = ContentScale.Crop // Para que la imagen cubra el área asignada
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f),
+                // O la relación de aspecto que prefieras para la imagen
+                contentScale = ContentScale.Crop, // Para que la imagen cubra el área asignada
             )
             Column(Modifier.padding(all = 8.dp)) {
                 Text(
@@ -482,21 +494,21 @@ fun IngredientCard(usedIngredient: UsedIngredient) {
                     style = MaterialTheme.typography.titleSmall, // O titleMedium
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis // Por si el nombre es muy largo
+                    overflow = TextOverflow.Ellipsis, // Por si el nombre es muy largo
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = "Tipo: ${usedIngredient.ingredient.type}", // Asumiendo que type es un String o Enum.toString()
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Cantidad: ${usedIngredient.quantity}",
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }

@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.ar.unlam.ddi.ui.theme.PrimaryGreen
 
 @Composable
 fun RatingBar(
@@ -23,21 +24,22 @@ fun RatingBar(
     rating: Float,
     maxRating: Int = 5,
     starsColor: Color = Color.Yellow,
-    emptyStarColor: Color = MaterialTheme.colorScheme.outline,
-    starSize: Dp = 20.dp // Añadido para consistencia
+    emptyStarColor: Color = PrimaryGreen,
+    starSize: Dp = 20.dp, // Añadido para consistencia
 ) {
     Row(modifier = modifier) {
         for (i in 1..maxRating) {
-            val icon = when {
-                rating >= i -> Icons.Filled.Star
-                rating >= i - 0.5f -> Icons.AutoMirrored.Filled.StarHalf
-                else -> Icons.Filled.StarBorder
-            }
+            val icon =
+                when {
+                    rating >= i -> Icons.Filled.Star
+                    rating >= i - 0.5f -> Icons.AutoMirrored.Filled.StarHalf
+                    else -> Icons.Filled.StarBorder
+                }
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = if (icon == Icons.Filled.StarBorder) emptyStarColor else starsColor,
-                modifier = Modifier.size(starSize)
+                modifier = Modifier.size(starSize),
             )
         }
     }
@@ -51,11 +53,11 @@ fun ClickableRatingBar(
     onRatingChanged: (Float) -> Unit,
     starSize: Dp = 24.dp, // Tamaño de las estrellas
     starColor: Color = Color.Yellow,
-    emptyStarColor: Color = MaterialTheme.colorScheme.outline
+    emptyStarColor: Color = MaterialTheme.colorScheme.outline,
 ) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.Center // Centra las estrellas
+        horizontalArrangement = Arrangement.Center, // Centra las estrellas
     ) {
         for (i in 1..maxRating) {
             val isSelected = currentRating >= i
@@ -63,10 +65,11 @@ fun ClickableRatingBar(
                 imageVector = if (isSelected) Icons.Filled.Star else Icons.Filled.StarBorder,
                 contentDescription = "Calificar $i de $maxRating estrellas",
                 tint = if (isSelected) starColor else emptyStarColor,
-                modifier = Modifier
-                    .size(starSize)
-                    .clickable { onRatingChanged(i.toFloat()) } // Actualiza al valor de la estrella clickeada
-                    .padding(horizontal = 2.dp) // Pequeño espacio entre estrellas
+                modifier =
+                    Modifier
+                        .size(starSize)
+                        .clickable { onRatingChanged(i.toFloat()) } // Actualiza al valor de la estrella clickeada
+                        .padding(horizontal = 2.dp), // Pequeño espacio entre estrellas
             )
         }
     }

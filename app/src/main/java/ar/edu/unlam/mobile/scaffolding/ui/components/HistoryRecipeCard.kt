@@ -24,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,7 +35,7 @@ import com.ar.unlam.ddi.ui.theme.PrimaryGreen
 import com.ar.unlam.ddi.ui.theme.PrimaryGreenDark
 
 @Composable
-fun RecipeCard(
+fun HistoryRecipeCard(
     recipe: RecipeListItem,
     modifier: Modifier = Modifier,
     onClickAction: () -> Unit = {},
@@ -86,12 +85,11 @@ fun RecipeCard(
                                 .weight(1f)
                                 .size(24.dp),
                     )
-                    // IconButton para mejor accesibilidad y ripple
+
                     IconButton(
                         onClick = { onFavoriteClick() },
                         modifier =
                             Modifier
-                                // Elimina las restricciones de tamaño mínimo
                                 .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp)
                                 .size(24.dp)
                                 .align(Alignment.CenterVertically),
@@ -105,37 +103,33 @@ fun RecipeCard(
                     }
                 }
 
-                Row {
+                /*Column(modifier = Modifier.padding(top = 5.dp)) {
                     Text(
-                        text = recipe.category.toString(),
-                        textAlign = TextAlign.Center,
+                        text = "Kcal: ${recipe.nutritionalValue} kcal",
                         style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(top = 2.dp, bottom = 2.dp),
+                        textAlign = TextAlign.Start
                     )
-                    Spacer(modifier = Modifier.size(10.dp))
-                    RatingBar(
-                        rating = recipe.rating,
-                        starSize = 18.dp,
-                        modifier =
-                            Modifier
-                                .padding(top = 2.dp, bottom = 2.dp)
-                                .align(Alignment.CenterVertically),
-                    )
-                }
-
-                Row {
                     Text(
-                        text = "Dificultad: ${recipe.difficulty}",
+                        text = "Proteína: ${recipe.protein} g",
                         style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.Start
                     )
-                    Spacer(modifier = Modifier.size(15.dp))
                     Text(
-                        text = "Porciones: ${recipe.portions} ",
+                        text = "Carbohidratos: ${recipe.carbs} g",
                         style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.Start
                     )
-                }
+                    Text(
+                        text = "Grasas: ${recipe.fats} g",
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Start
+                    )
+                    Text(
+                        text = "${recipe.date}",
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Start
+                    )
+                }*/
             }
         }
     }
@@ -143,8 +137,8 @@ fun RecipeCard(
 
 @Preview
 @Composable
-fun RecipeCardPreview() {
-    RecipeCard(
+fun HistoryRecipeCardPreview() {
+    HistoryRecipeCard(
         recipe =
             RecipeListItem(
                 id = 1,
@@ -154,6 +148,7 @@ fun RecipeCardPreview() {
                 difficulty = Difficulty.Fácil,
                 portions = 2,
                 tags = listOf(Category.Vegano, Category.Proteico, Category.Desayuno),
+                isFavorite = true,
             ),
     )
 }

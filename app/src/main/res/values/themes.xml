@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.DietappV2" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.DietappV2" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">#185529</item>
+        <item name="android:windowTranslucentStatus">false</item> <!-- Set to false for light icons -->
+    </style>
 </resources>

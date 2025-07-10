@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class RecipesViewModel
+class HistoryViewModel
     @Inject
     constructor(
         private val recipesRepository: RecipesRepository,
@@ -130,11 +130,13 @@ class RecipesViewModel
         // No pude hacer que funcione bien, no muestra el cambio al instante
         fun toggleFavorite(recipeId: Int) {
             viewModelScope.launch {
-                // Necesitamos saber el estado actual de isFavorite para invertirlo.
+                // Primero, necesitamos saber el estado actual de isFavorite para invertirlo.
                 // La forma más robusta es obtener el estado actual del objeto que ya tienes en la UI
+                // o, si es necesario, obtenerlo de la lista actual.
                 // PERO, idealmente, el Flow ya nos dará el estado.
 
                 // Lo que necesitas hacer es llamar al repositorio para que actualice la BD.
+                // No necesitas obtener la receta completa aquí si solo vas a cambiar el favorito.
 
                 // Necesitamos saber el estado actual para poder invertirlo.
                 // La forma más directa es encontrar el item en la lista actual que se está mostrando.

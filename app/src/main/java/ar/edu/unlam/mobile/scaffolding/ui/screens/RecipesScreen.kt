@@ -1,7 +1,6 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens
 
 import android.annotation.SuppressLint
-import androidx.activity.result.launch
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
@@ -18,7 +17,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -27,11 +25,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -46,12 +42,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import ar.edu.unlam.mobile.scaffolding.data.datasources.local.recipes.Recipe
-import ar.edu.unlam.mobile.scaffolding.ui.components.RecipeCard
-import ar.edu.unlam.mobile.scaffolding.ui.components.TopBar
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -59,6 +49,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -68,10 +59,17 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import ar.edu.unlam.mobile.scaffolding.data.datasources.local.recipes.Category
+import ar.edu.unlam.mobile.scaffolding.data.model.SortCriterion
+import ar.edu.unlam.mobile.scaffolding.data.model.recipes.Category
+import ar.edu.unlam.mobile.scaffolding.data.model.recipes.RecipeListItem
+import ar.edu.unlam.mobile.scaffolding.ui.components.RecipeCard
+import ar.edu.unlam.mobile.scaffolding.ui.components.TopBar
+import com.ar.unlam.ddi.ui.theme.PrimaryGreen
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -79,9 +77,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun RecipeScreen(
     viewModel: RecipesViewModel = hiltViewModel(),
-    navController: NavController
+    navController: NavController,
 ) {
-    val recipes: List<Recipe> by viewModel.recipes.collectAsState()
+    val recipes: List<RecipeListItem> by viewModel.recipes.collectAsState()
     val selectedFilterTags: List<Category> by viewModel.selectedFilterTags.collectAsState()
     val currentSortCriterion: SortCriterion by viewModel.sortCriterion.collectAsState() // Obtener estado de ordenación
 
@@ -112,23 +110,27 @@ fun RecipeScreen(
             headerRowHeightPx + if (showFilters) filterChipsHeightPx else 0f
         }
     }
-    val nestedScrollConnection = remember {
-        object : NestedScrollConnection {
-            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                val delta = available.y
-                // Solo reaccionar al scroll si el header tiene alguna altura
-                if (totalCollapsibleHeaderHeightPx == 0f) return Offset.Zero
+    val nestedScrollConnection =
+        remember {
+            object : NestedScrollConnection {
+                override fun onPreScroll(
+                    available: Offset,
+                    source: NestedScrollSource,
+                ): Offset {
+                    val delta = available.y
+                    // Solo reaccionar al scroll si el header tiene alguna altura
+                    if (totalCollapsibleHeaderHeightPx == 0f) return Offset.Zero
 
-                val newOffset = headerOffsetPx + delta
-                val oldOffset = headerOffsetPx
-                headerOffsetPx = newOffset.coerceIn(-totalCollapsibleHeaderHeightPx, 0f)
+                    val newOffset = headerOffsetPx + delta
+                    val oldOffset = headerOffsetPx
+                    headerOffsetPx = newOffset.coerceIn(-totalCollapsibleHeaderHeightPx, 0f)
 
-                // Devolver la cantidad de scroll consumida por el header
-                // para que la lista no scrollee esa cantidad.
-                return Offset(0f, headerOffsetPx - oldOffset)
+                    // Devolver la cantidad de scroll consumida por el header
+                    // para que la lista no scrollee esa cantidad.
+                    return Offset(0f, headerOffsetPx - oldOffset)
+                }
             }
         }
-    }
 
     fun getSortCriterionText(criterion: SortCriterion): String {
         return when (criterion) {
@@ -143,46 +145,53 @@ fun RecipeScreen(
     }
 
     Scaffold(
-        topBar = { TopBar("Recetas", back) }
+        topBar = { TopBar("Recetas", back) },
     ) { scaffoldPaddingValues ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(scaffoldPaddingValues)
-                .nestedScroll(nestedScrollConnection)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(scaffoldPaddingValues)
+                    .nestedScroll(nestedScrollConnection),
         ) {
             // Contenido de la Lista (LazyColumn)
             // Su padding superior se ajustará para dejar espacio al header
             LazyColumn(
                 state = lazyListState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 5.dp),
-                contentPadding = PaddingValues(
-                    top = with(localDensity) {
-                        (totalCollapsibleHeaderHeightPx + headerOffsetPx).toDp() + 6.dp // 6.dp es tu padding original
-                    },
-                    bottom = scaffoldPaddingValues.calculateBottomPadding() + 6.dp
-                )
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(Color.White)
+                        .padding(horizontal = 5.dp),
+                contentPadding =
+                    PaddingValues(
+                        top =
+                            with(localDensity) {
+                                (totalCollapsibleHeaderHeightPx + headerOffsetPx).toDp() + 6.dp // 6.dp es tu padding original
+                            },
+                        bottom = scaffoldPaddingValues.calculateBottomPadding() + 6.dp,
+                    ),
             ) {
                 if (recipes.isEmpty()) {
                     item { // Necesitas envolver el contenido de "lista vacía" en un item o items
                         Column(
-                            modifier = Modifier
-                                .fillParentMaxSize() // Ocupa todo el espacio del viewport de LazyColumn
-                                .padding(horizontal = 3.dp), // Ajusta según el padding del LazyColumn
+                            modifier =
+                                Modifier
+                                    .fillParentMaxSize() // Ocupa todo el espacio del viewport de LazyColumn
+                                    .padding(horizontal = 3.dp),
+                            // Ajusta según el padding del LazyColumn
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
+                            verticalArrangement = Arrangement.Center,
                         ) {
                             if (selectedFilterTags.isNotEmpty()) {
                                 Text(
                                     "No hay recetas que coincidan con todas las tags seleccionadas.",
-                                    textAlign = TextAlign.Center
+                                    textAlign = TextAlign.Center,
                                 )
                             } else {
                                 Text(
                                     "No hay recetas disponibles o cargando...",
-                                    textAlign = TextAlign.Center
+                                    textAlign = TextAlign.Center,
                                 )
                             }
                         }
@@ -191,18 +200,18 @@ fun RecipeScreen(
                     items(recipes, key = { it.id }) { recipe ->
                         RecipeCard(
                             recipe = recipe,
-                            onFavoriteClick = { recipeToToggle ->
-                                viewModel.toggleFavorite(recipeToToggle.id)
+                            onFavoriteClick = {
+                                viewModel.toggleFavorite(recipe.id)
                             },
                             onClickAction = {
                                 navController.navigate("Preparation_screen/${recipe.id}")
-                            }
+                            },
                         )
                         if (recipes.indexOf(recipe) < recipes.size - 1) {
                             HorizontalDivider(
                                 modifier = Modifier.padding(horizontal = 8.dp),
                                 thickness = 0.8.dp,
-                                color = MaterialTheme.colorScheme.outlineVariant
+                                color = MaterialTheme.colorScheme.outlineVariant,
                             )
                         }
                     }
@@ -212,35 +221,38 @@ fun RecipeScreen(
             // Header completo (Row de Filtros/Resultados + FlowRow de Chips)
             // Se posiciona en la parte superior del Box y se desplaza con offset
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .offset { IntOffset(x = 0, y = headerOffsetPx.toInt()) }
-                    .background(MaterialTheme.colorScheme.surface) // Fondo para todo el header
-                    .zIndex(1f) // Asegura que el header esté sobre la lista si hay superposición durante la animación
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .offset { IntOffset(x = 0, y = headerOffsetPx.toInt()) }
+                        .background(MaterialTheme.colorScheme.surface) // Fondo para todo el header
+                        .zIndex(1f), // Asegura que el header esté sobre la lista si hay superposición durante la animación
             ) {
                 // Row de Filtros y Resultados
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.LightGray.copy(alpha = 0.2f))
-                        .onSizeChanged { size ->
-                            headerRowHeightPx = size.height.toFloat()
-                        }
-                        .padding(horizontal = 14.dp, vertical = 2.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .background(com.ar.unlam.ddi.ui.theme.PrimaryGreen.copy(alpha = 0.8f))
+                            .onSizeChanged { size ->
+                                headerRowHeightPx = size.height.toFloat()
+                            }
+                            .padding(horizontal = 14.dp, vertical = 2.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     OutlinedButton(
                         onClick = { showFilters = !showFilters },
                         shape = RoundedCornerShape(8.dp),
-                        border = BorderStroke(1.dp, Color.LightGray),
+                        border = BorderStroke(1.dp, Color.White),
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 1.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black)
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black),
                     ) {
-                        Text("Filtros", fontSize = 14.sp)
+                        Text("Filtros", fontSize = 14.sp, color = Color.White)
                         Spacer(Modifier.width(6.dp))
                         Icon(
                             imageVector = if (showFilters) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                            contentDescription = if (showFilters) "Ocultar filtros" else "Mostrar filtros"
+                            contentDescription = if (showFilters) "Ocultar filtros" else "Mostrar filtros",
+                            tint = Color.White, // Cambia el color del icono a blanco
                         )
                     }
                     Spacer(Modifier.width(8.dp)) // Espacio entre Filtros y Sort
@@ -250,27 +262,29 @@ fun RecipeScreen(
                         OutlinedButton(
                             onClick = { showSortMenu = !showSortMenu }, // Cambiado para alternar showSortMenu
                             shape = RoundedCornerShape(8.dp),
-                            border = BorderStroke(1.dp, Color.LightGray),
+                            border = BorderStroke(1.dp, Color.White),
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 1.dp),
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black)
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black),
                         ) {
                             Text(
                                 text = if (currentSortCriterion != SortCriterion.NONE) getSortCriterionText(currentSortCriterion).take(10) + "..." else "Ordenar",
                                 fontSize = 14.sp,
                                 maxLines = 1,
-                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                                color = Color.White, // Cambia el color del texto a blanco
                             )
                             Spacer(Modifier.width(6.dp))
                             Icon(
                                 // Cambiar el icono del botón Sort aquí
                                 imageVector = if (showSortMenu) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                                contentDescription = if (showSortMenu) "Ocultar opciones de orden" else "Mostrar opciones de orden"
+                                contentDescription = if (showSortMenu) "Ocultar opciones de orden" else "Mostrar opciones de orden",
+                                tint = Color.White, // Cambia el color del icono a blanco
                             )
                         }
 
                         DropdownMenu(
                             expanded = showSortMenu,
-                            onDismissRequest = { showSortMenu = false } // Mantener esto para cerrar si se hace clic fuera
+                            onDismissRequest = { showSortMenu = false }, // Mantener esto para cerrar si se hace clic fuera
                         ) {
                             SortCriterion.entries.forEach { criterion ->
                                 DropdownMenuItem(
@@ -283,7 +297,7 @@ fun RecipeScreen(
                                         if (currentSortCriterion == criterion) {
                                             Icon(Icons.Filled.Check, "Seleccionado")
                                         }
-                                    }
+                                    },
                                 )
                             }
                         }
@@ -294,41 +308,46 @@ fun RecipeScreen(
                     Text(
                         text = "${recipes.size} ${if (recipes.size == 1) "Resultado" else "Resultados"}",
                         style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White,
                     )
                 }
                 // FlowRow con FilterChips
                 AnimatedVisibility(
                     visible = showFilters,
-                    enter = slideInVertically(
-                        initialOffsetY = { -it },
-                        animationSpec = tween(durationMillis = 150) // Reduce la duración (ej: 150ms)
-                    ),
-                    exit = slideOutVertically(
-                        targetOffsetY = { -it },
-                        animationSpec = tween(durationMillis = 100) // La salida puede ser incluso más rápida (ej: 100ms)
-                    )
+                    enter =
+                        slideInVertically(
+                            initialOffsetY = { -it },
+                            animationSpec = tween(durationMillis = 150), // Reduce la duración (ej: 150ms)
+                        ),
+                    exit =
+                        slideOutVertically(
+                            targetOffsetY = { -it },
+                            animationSpec = tween(durationMillis = 100), // La salida puede ser incluso más rápida (ej: 100ms)
+                        ),
                 ) {
                     // Envuelve el FlowRow en un Box para medir su altura
                     Box(modifier = Modifier.onSizeChanged { size -> filterChipsHeightPx = size.height.toFloat() }) {
                         if (allAvailableCategories.isNotEmpty()) {
                             FlowRow(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 4.dp, bottom = 8.dp, start = 16.dp, end = 16.dp),
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 4.dp, bottom = 8.dp, start = 16.dp, end = 16.dp),
                             ) {
                                 allAvailableCategories.forEach { category ->
                                     FilterChip(
                                         selected = selectedFilterTags.contains(category),
                                         onClick = { viewModel.toggleFilterTag(category) },
                                         label = { Text(category.name) },
-                                        modifier = Modifier.padding(end = 4.dp, bottom = 4.dp)
+                                        modifier = Modifier.padding(end = 4.dp, bottom = 4.dp),
+                                        border = BorderStroke(1.dp, PrimaryGreen),
                                     )
                                 }
                             }
                         } else {
                             Text(
                                 "No hay categorías de filtro disponibles.",
-                                modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
+                                modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
                             )
                         }
                     }

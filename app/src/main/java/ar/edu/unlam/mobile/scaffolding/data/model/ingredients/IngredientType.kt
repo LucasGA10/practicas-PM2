@@ -1,4 +1,4 @@
-package ar.edu.unlam.mobile.scaffolding.data.datasources.local.ingredients
+package ar.edu.unlam.mobile.scaffolding.data.model.ingredients
 
 enum class IngredientType {
     Verdura,
@@ -11,5 +11,5 @@ enum class IngredientType {
     Condimento,
     Aceite,
     Líquido,
-    Otros
+    Otros,
 }
