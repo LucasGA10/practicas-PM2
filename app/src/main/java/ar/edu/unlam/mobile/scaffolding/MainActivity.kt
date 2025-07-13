@@ -1,12 +1,14 @@
 package ar.edu.unlam.mobile.scaffolding
 
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -15,7 +17,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.sp
 import androidx.core.content.res.ResourcesCompat
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -58,9 +62,7 @@ object NavDestinations {
     const val RECIPE_LIST_ROUTE = "recipes" // O como la hayas llamado
     const val PREPARATION_ROUTE_WITH_ARG = "preparation/{recipeId}"
     const val RECIPE_ARGUMENT = "recipeId"
-    const val HISTORIAL_ROUTE = "historial"
-
-    // Añade la ruta para userProgres aquí también si quieres consistencia
+    const val HISTORY_ROUTE = "historial"
     const val USER_PROGRESS_ROUTE_WITH_ARG = "userProgress/{id}"
 }
 
@@ -118,9 +120,10 @@ fun MainScreen() {
 
             composable(
                 route = NavDestinations.USER_PROGRESS_ROUTE_WITH_ARG,
-                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+                arguments = listOf(navArgument("id") { type = NavType.IntType }),
             ) { navBackStackEntry ->
                 val userId = navBackStackEntry.arguments?.getInt("id")
+                Log.d("MainActivity_UserProgress", "Received User ID in NavHost: $userId")
                 if (userId != null) {
                     UserProgressScreen(navController = controller)
                 } else {
@@ -139,7 +142,7 @@ fun MainScreen() {
                 PreparationScreen(navController = controller)
             }
 
-            composable(NavDestinations.HISTORIAL_ROUTE) {
+            composable(NavDestinations.HISTORY_ROUTE) {
                 HistoryScreen(navController = controller)
             }
         }

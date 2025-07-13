@@ -1,5 +1,6 @@
 package ar.edu.unlam.mobile.scaffolding.ui.components
 
+import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Home
@@ -23,21 +24,32 @@ import ar.edu.unlam.mobile.scaffolding.NavDestinations
 fun BottomBar(controller: NavHostController) {
     val navBackStackEntry by controller.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-    val currentUserId = "1"
+    val currentUserId = "1" // ID de usuario fijo para testeo
 
-    NavigationBar(containerColor = Color(0xFF185529)) {
+    NavigationBar(containerColor = MaterialTheme.colorScheme.primary) {
         // --- Home Item ---
-        val isHomeSelected = currentDestination?.hierarchy?.any { it.route == "home" } == true
+        val homeRoute = "home"
+        val isHomeSelected = currentDestination?.hierarchy?.any { it.route == homeRoute } == true
         NavigationBarItem(
             selected = isHomeSelected,
-            onClick = { controller.navigate("home") },
+            onClick = {
+                if (!isHomeSelected) {
+                    controller.navigate(homeRoute) {
+                        val startDestinationRoute = controller.graph.findNode(controller.graph.startDestinationId)?.route
+                        if (startDestinationRoute != null) {
+                            popUpTo(startDestinationRoute)
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            },
             icon = {
                 Icon(
                     imageVector = Icons.Default.Home,
                     contentDescription = "Home",
                 )
             },
-            // Puedes personalizar el color del icono aquí
             colors =
                 NavigationBarItemDefaults.colors(
                     selectedIconColor = Color.White,
@@ -45,30 +57,51 @@ fun BottomBar(controller: NavHostController) {
                     unselectedIconColor = MaterialTheme.colorScheme.secondary,
                 ),
             label = {
-                // Solo muestra el texto si esta seleccionado
                 if (isHomeSelected) {
                     Text(
                         text = "Home",
                         style = MaterialTheme.typography.labelMedium,
-                        color = Color.White, // Color del texto cuando está seleccionado
+                        color = Color.White,
                     )
                 }
             },
-            alwaysShowLabel = false, // Importante para que no reserve espacio si no hay label
+            alwaysShowLabel = false,
         )
 
         // --- Progreso Item ---
-        val isProgresoSelected =
-            currentDestination?.hierarchy?.any {
-                it.route == "userProgress/$currentUserId" || it.route?.startsWith("userProgres/") == true
-            } == true
+        val userProgressRoutePattern = NavDestinations.USER_PROGRESS_ROUTE_WITH_ARG
+
+        val isProgressSelected = currentDestination?.hierarchy?.any { navDest ->
+            navDest.route == userProgressRoutePattern
+        } == true
+
         NavigationBarItem(
-            selected = isProgresoSelected,
-            onClick = { controller.navigate("userProgress/$currentUserId") },
+            //Usa la logica simplificada para verificar el ID.
+            selected = isProgressSelected,
+            onClick = {
+                val routeToNavigate = userProgressRoutePattern.replace("{id}", currentUserId)
+                // Solo navega si la ruta actual (con su argumento resuelto si es el mismo patrón)
+                // Esta condición de onClick podría necesitar refinamiento para evitar navegación innecesaria
+                // si ya estás en userProgress/1.
+                var currentlyOnTarget = false
+                if (currentDestination?.route == userProgressRoutePattern) {
+                    val currentEntryId = navBackStackEntry?.arguments?.getInt("id")?.toString()
+                    if (currentEntryId == currentUserId) {
+                        currentlyOnTarget = true
+                    }
+                }
+
+                if (!currentlyOnTarget) {
+                    //isProgressSelected no verifica el ID.
+                    controller.navigate(routeToNavigate) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            },
             icon = {
                 Icon(
                     imageVector = Icons.Filled.Leaderboard,
-                    // painter = painterResource(id = com.ar.unlam.ddi.R.drawable.image_2027680),
                     contentDescription = "Progreso",
                 )
             },
@@ -79,7 +112,7 @@ fun BottomBar(controller: NavHostController) {
                     unselectedIconColor = MaterialTheme.colorScheme.secondary,
                 ),
             label = {
-                if (isProgresoSelected) {
+                if (isProgressSelected) {
                     Text(
                         text = "Dieta",
                         style = MaterialTheme.typography.labelMedium,
@@ -91,14 +124,22 @@ fun BottomBar(controller: NavHostController) {
         )
 
         // --- Recipes Item ---
-        val isRecipesSelected = currentDestination?.hierarchy?.any { it.route == "recipes" } == true
+        val recipesRoute = "recipes"
+        val isRecipesSelected = currentDestination?.hierarchy?.any { it.route == recipesRoute } == true
         NavigationBarItem(
             selected = isRecipesSelected,
-            onClick = { controller.navigate("recipes") },
+            onClick = {
+                if (!isRecipesSelected) {
+                    controller.navigate(recipesRoute) {
+                        launchSingleTop = true
+                        restoreState = true
+                        // Considera popUpTo
+                    }
+                }
+            },
             icon = {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.MenuBook,
-                    // painter = painterResource(id = com.ar.unlam.ddi.R.drawable.image_2027673),
                     contentDescription = "Recipes",
                 )
             },
@@ -121,10 +162,19 @@ fun BottomBar(controller: NavHostController) {
         )
 
         // --- Historial Item ---
-        val isHistorialSelected = currentDestination?.hierarchy?.any { it.route == NavDestinations.HISTORIAL_ROUTE } == true
+        val historyRoute = NavDestinations.HISTORY_ROUTE
+        val isHistorialSelected = currentDestination?.hierarchy?.any { it.route == historyRoute } == true
         NavigationBarItem(
             selected = isHistorialSelected,
-            onClick = { controller.navigate(NavDestinations.HISTORIAL_ROUTE) },
+            onClick = {
+                if (!isHistorialSelected) {
+                    controller.navigate(historyRoute) {
+                        launchSingleTop = true
+                        restoreState = true
+                        // Considera popUpTo
+                    }
+                }
+            },
             icon = {
                 Icon(
                     imageVector = Icons.Rounded.History,

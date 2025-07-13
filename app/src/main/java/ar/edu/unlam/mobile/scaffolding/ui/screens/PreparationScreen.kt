@@ -61,6 +61,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.NutritionalValue
 import ar.edu.unlam.mobile.scaffolding.ui.components.ClickableRatingBar
+import ar.edu.unlam.mobile.scaffolding.ui.components.ExpandableSection
+import ar.edu.unlam.mobile.scaffolding.ui.components.NutritionalInfoCard
 import ar.edu.unlam.mobile.scaffolding.ui.components.RatingBar
 import ar.edu.unlam.mobile.scaffolding.ui.components.TopBar
 import coil.compose.AsyncImage
@@ -421,61 +423,6 @@ fun PreparationScreen(
 }
 
 @Composable
-fun ExpandableSection(
-    title: String,
-    isVisible: Boolean,
-    onHeaderClick: () -> Unit,
-    content: @Composable () -> Unit, // Contenido de la sección como un slot Composable
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = onHeaderClick) // Hace que toda la fila del encabezado sea clickeable
-                    .padding(vertical = 12.dp, horizontal = 16.dp),
-            // Padding para el encabezado
-            horizontalArrangement = Arrangement.SpaceBetween, // Separa el título del ícono
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                // modifier = Modifier.weight(1f) // Opcional: si quieres que el texto ocupe más espacio
-            )
-            Icon(
-                imageVector = if (isVisible) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                contentDescription = if (isVisible) "Colapsar $title" else "Expandir $title",
-                tint = MaterialTheme.colorScheme.primary, // Opcional: para darle color al ícono
-            )
-        }
-
-        // AnimatedVisibility para mostrar/ocultar el contenido con animación
-        AnimatedVisibility(
-            visible = isVisible,
-            // Modifica aquí la duración de las animaciones
-            enter =
-                fadeIn(animationSpec = tween(durationMillis = 100)) +
-                    slideInVertically(
-                        animationSpec = tween(durationMillis = 150),
-                        initialOffsetY = { fullHeight -> -fullHeight / 4 },
-                    ),
-            exit =
-                fadeOut(animationSpec = tween(durationMillis = 100)) +
-                    slideOutVertically(
-                        animationSpec = tween(durationMillis = 150),
-                        targetOffsetY = { fullHeight -> -fullHeight / 4 },
-                    ),
-        ) {
-            Column {
-                content()
-            }
-        }
-    }
-}
-
-@Composable
 fun IngredientCard(uiUsedIngredient: UiUsedIngredient) {
     // Puedes usar Card o ElevatedCard para diferentes efectos visuales
     ElevatedCard(
@@ -519,68 +466,3 @@ fun IngredientCard(uiUsedIngredient: UiUsedIngredient) {
     }
 }
 
-@Composable
-fun NutritionalInfoCard(nutritionalValue: NutritionalValue?) {
-    if (nutritionalValue == null) {
-        // No mostrar nada si no hay datos nutricionales
-        return
-    }
-
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp) // Padding lateral para la caja, igual que el consejo
-                .clip(RoundedCornerShape(8.dp))
-                .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.7f)) // Fondo similar al consejo
-                .padding(all = 12.dp),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Filled.RestaurantMenu,
-                contentDescription = "Información Nutricional",
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(20.dp),
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Información Nutricional (por porción):",
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Mostrar cada valor nutricional si está disponible
-        NutritionalDetailRow("Valor General:", "${nutritionalValue.generalValue}")
-        NutritionalDetailRow("Calorías:", "${nutritionalValue.calories} kcal")
-        NutritionalDetailRow("Proteínas:", "${nutritionalValue.protein} g")
-        NutritionalDetailRow("Carbohidratos:", "${nutritionalValue.carbs} g")
-        NutritionalDetailRow("Grasas:", "${nutritionalValue.fats} g")
-    }
-}
-
-@Composable
-fun NutritionalDetailRow(
-    label: String,
-    value: String,
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-    Spacer(modifier = Modifier.height(4.dp))
-}
