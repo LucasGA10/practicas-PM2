@@ -1,4 +1,4 @@
-package ar.edu.unlam.mobile.scaffolding.ui.screens
+package ar.edu.unlam.mobile.scaffolding.ui.screens.recipes
 
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle

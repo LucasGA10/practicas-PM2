@@ -8,7 +8,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -17,9 +16,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.sp
 import androidx.core.content.res.ResourcesCompat
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -28,9 +25,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import ar.edu.unlam.mobile.scaffolding.ui.components.BottomBar
-import ar.edu.unlam.mobile.scaffolding.ui.screens.HistoryScreen
-import ar.edu.unlam.mobile.scaffolding.ui.screens.PreparationScreen
-import ar.edu.unlam.mobile.scaffolding.ui.screens.RecipeScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.DietFormScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.recipes.HistoryScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.recipes.PreparationScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.recipes.RecipeScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.UserProgressScreen
 import ar.edu.unlam.mobile.scaffolding.ui.theme.DietappV2Theme
 import com.ar.unlam.ddi.ui.CodiaMainView
@@ -58,6 +56,7 @@ class MainActivity : ComponentActivity() {
 }
 
 object NavDestinations {
+    const val DIET_FORM_ROUTE = "dietForm"
     const val HOME_ROUTE = "home"
     const val RECIPE_LIST_ROUTE = "recipes" // O como la hayas llamado
     const val PREPARATION_ROUTE_WITH_ARG = "preparation/{recipeId}"
@@ -76,6 +75,8 @@ fun MainScreen() {
     // Usa las plantillas de ruta completas, incluyendo los placeholders de argumentos
     val routesWithoutBottomBar =
         setOf(
+            NavDestinations.DIET_FORM_ROUTE,
+
             NavDestinations.PREPARATION_ROUTE_WITH_ARG,
             // Puedes añadir más rutas aquí si es necesario
             // "otra_pantalla_sin_bottom_bar"
@@ -116,6 +117,10 @@ fun MainScreen() {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     CodiaMainView()
                 }
+            }
+
+            composable(NavDestinations.DIET_FORM_ROUTE) {
+                DietFormScreen(navController = controller)
             }
 
             composable(

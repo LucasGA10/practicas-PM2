@@ -1,4 +1,4 @@
-package ar.edu.unlam.mobile.scaffolding.ui.screens
+package ar.edu.unlam.mobile.scaffolding.ui.screens.recipes
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background

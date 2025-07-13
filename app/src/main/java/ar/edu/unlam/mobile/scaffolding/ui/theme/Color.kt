@@ -15,3 +15,5 @@ val greenSecondary = Color(0xFF34A853)
 val greenTertiary = Color(0xFF34A853)
 
 val gold = Color(0xFFC4AA04)
+
+val backgroundWhite = Color(0xFFFFFBFE)
