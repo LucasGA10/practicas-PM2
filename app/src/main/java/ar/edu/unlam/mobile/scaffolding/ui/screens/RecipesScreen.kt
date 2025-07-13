@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
@@ -58,15 +59,16 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import ar.edu.unlam.mobile.scaffolding.data.model.SortCriterion
-import ar.edu.unlam.mobile.scaffolding.data.model.recipes.Category
-import ar.edu.unlam.mobile.scaffolding.data.model.recipes.RecipeListItem
+import ar.edu.unlam.mobile.scaffolding.domain.model.SortCriterion
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.Category
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.RecipeListItem
 import ar.edu.unlam.mobile.scaffolding.ui.components.RecipeCard
 import ar.edu.unlam.mobile.scaffolding.ui.components.TopBar
 import com.ar.unlam.ddi.ui.theme.PrimaryGreen
@@ -85,7 +87,6 @@ fun RecipeScreen(
 
     val allAvailableCategories: List<Category> = Category.entries
     var showFilters by remember { mutableStateOf(false) }
-    val back: (() -> Unit)? = { navController.popBackStack() }
 
     var showSortMenu by remember { mutableStateOf(false) }
 
@@ -96,7 +97,7 @@ fun RecipeScreen(
     var headerOffsetPx by remember { mutableFloatStateOf(0f) }
     val localDensity = LocalDensity.current
 
-    LaunchedEffect(currentSortCriterion, selectedFilterTags) { // Observa cambios en estos estados
+    LaunchedEffect(currentSortCriterion, selectedFilterTags) {
         if (recipes.isNotEmpty()) { // Solo hacer scroll si hay items
             coroutineScope.launch {
                 lazyListState.animateScrollToItem(index = 0) // O scrollToItem(index = 0) para ir sin animación
@@ -145,7 +146,7 @@ fun RecipeScreen(
     }
 
     Scaffold(
-        topBar = { TopBar("Recetas", back) },
+        topBar = { TopBar("Recetas") },
     ) { scaffoldPaddingValues ->
         Box(
             modifier =
@@ -177,7 +178,7 @@ fun RecipeScreen(
                         Column(
                             modifier =
                                 Modifier
-                                    .fillParentMaxSize() // Ocupa todo el espacio del viewport de LazyColumn
+                                    .fillParentMaxSize() // Ocupa el total del espacio del viewport de LazyColumn
                                     .padding(horizontal = 3.dp),
                             // Ajusta según el padding del LazyColumn
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -189,10 +190,15 @@ fun RecipeScreen(
                                     textAlign = TextAlign.Center,
                                 )
                             } else {
-                                Text(
-                                    "No hay recetas disponibles o cargando...",
-                                    textAlign = TextAlign.Center,
-                                )
+//                                Text(
+//                                    "No hay recetas disponibles o cargando...",
+//                                    textAlign = TextAlign.Center,
+//                                )
+                                Box {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.align(Alignment.Center),
+                                    )
+                                }
                             }
                         }
                     }
@@ -204,7 +210,7 @@ fun RecipeScreen(
                                 viewModel.toggleFavorite(recipe.id)
                             },
                             onClickAction = {
-                                navController.navigate("Preparation_screen/${recipe.id}")
+                                navController.navigate("preparation/${recipe.id}")
                             },
                         )
                         if (recipes.indexOf(recipe) < recipes.size - 1) {
@@ -219,21 +225,21 @@ fun RecipeScreen(
             }
 
             // Header completo (Row de Filtros/Resultados + FlowRow de Chips)
-            // Se posiciona en la parte superior del Box y se desplaza con offset
             Column(
                 modifier =
                     Modifier
                         .fillMaxWidth()
                         .offset { IntOffset(x = 0, y = headerOffsetPx.toInt()) }
-                        .background(MaterialTheme.colorScheme.surface) // Fondo para todo el header
-                        .zIndex(1f), // Asegura que el header esté sobre la lista si hay superposición durante la animación
+                        .background(MaterialTheme.colorScheme.surface) // Fondo para el header
+                        .zIndex(1f),
+                // Asegura que el header esté sobre la lista si hay superposición durante la animación
             ) {
                 // Row de Filtros y Resultados
                 Row(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .background(com.ar.unlam.ddi.ui.theme.PrimaryGreen.copy(alpha = 0.8f))
+                            .background(PrimaryGreen.copy(alpha = 0.8f))
                             .onSizeChanged { size ->
                                 headerRowHeightPx = size.height.toFloat()
                             }
@@ -247,44 +253,59 @@ fun RecipeScreen(
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 1.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black),
                     ) {
-                        Text("Filtros", fontSize = 14.sp, color = Color.White)
+                        val filterButtonText =
+                            if (selectedFilterTags.isNotEmpty()) {
+                                "Filtros (${selectedFilterTags.size})"
+                            } else {
+                                "Filtros"
+                            }
+                        Text(
+                            text = filterButtonText,
+                            fontSize = 14.sp,
+                            color = Color.White,
+                        )
                         Spacer(Modifier.width(6.dp))
                         Icon(
                             imageVector = if (showFilters) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
                             contentDescription = if (showFilters) "Ocultar filtros" else "Mostrar filtros",
-                            tint = Color.White, // Cambia el color del icono a blanco
+                            tint = Color.White,
                         )
                     }
-                    Spacer(Modifier.width(8.dp)) // Espacio entre Filtros y Sort
+                    Spacer(Modifier.width(8.dp))
 
                     // Botón de Sort con DropdownMenu
                     Box {
                         OutlinedButton(
-                            onClick = { showSortMenu = !showSortMenu }, // Cambiado para alternar showSortMenu
+                            onClick = { showSortMenu = !showSortMenu },
                             shape = RoundedCornerShape(8.dp),
                             border = BorderStroke(1.dp, Color.White),
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 1.dp),
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black),
                         ) {
                             Text(
-                                text = if (currentSortCriterion != SortCriterion.NONE) getSortCriterionText(currentSortCriterion).take(10) + "..." else "Ordenar",
+                                text =
+                                    if (currentSortCriterion != SortCriterion.NONE) {
+                                        getSortCriterionText(currentSortCriterion).take(10) + "..."
+                                    } else {
+                                        "Ordenar"
+                                    },
                                 fontSize = 14.sp,
                                 maxLines = 1,
-                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                                color = Color.White, // Cambia el color del texto a blanco
+                                overflow = TextOverflow.Ellipsis,
+                                color = Color.White,
                             )
                             Spacer(Modifier.width(6.dp))
                             Icon(
                                 // Cambiar el icono del botón Sort aquí
                                 imageVector = if (showSortMenu) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
                                 contentDescription = if (showSortMenu) "Ocultar opciones de orden" else "Mostrar opciones de orden",
-                                tint = Color.White, // Cambia el color del icono a blanco
+                                tint = Color.White,
                             )
                         }
 
                         DropdownMenu(
                             expanded = showSortMenu,
-                            onDismissRequest = { showSortMenu = false }, // Mantener esto para cerrar si se hace clic fuera
+                            onDismissRequest = { showSortMenu = false },
                         ) {
                             SortCriterion.entries.forEach { criterion ->
                                 DropdownMenuItem(
@@ -332,7 +353,12 @@ fun RecipeScreen(
                                 modifier =
                                     Modifier
                                         .fillMaxWidth()
-                                        .padding(top = 4.dp, bottom = 8.dp, start = 16.dp, end = 16.dp),
+                                        .padding(
+                                            top = 4.dp,
+                                            bottom = 8.dp,
+                                            start = 16.dp,
+                                            end = 16.dp,
+                                        ),
                             ) {
                                 allAvailableCategories.forEach { category ->
                                     FilterChip(

@@ -12,19 +12,22 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.res.ResourcesCompat
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import ar.edu.unlam.mobile.scaffolding.ui.components.BottomBar
 import ar.edu.unlam.mobile.scaffolding.ui.screens.HistoryScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.PreparationScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.RecipeScreen
-import ar.edu.unlam.mobile.scaffolding.ui.screens.UserScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.UserProgressScreen
 import ar.edu.unlam.mobile.scaffolding.ui.theme.DietappV2Theme
 import com.ar.unlam.ddi.ui.CodiaMainView
 import dagger.hilt.android.AndroidEntryPoint
@@ -51,60 +54,92 @@ class MainActivity : ComponentActivity() {
 }
 
 object NavDestinations {
-    const val RECIPE_LIST_ROUTE = "Recipes"
-    const val PREPARATION_ROUTE_PREFIX = "Preparation_screen" // Prefijo para la ruta
-    const val RECIPE_ARGUMENT = "recipeId" // Nombre del argumento
-    const val HISTORIAL = "Historial" // Nombre del argumento
-    const val PREPARATION_ROUTE_WITH_ARG = "$PREPARATION_ROUTE_PREFIX/{$RECIPE_ARGUMENT}" // Ruta completa con el argumento
+    const val HOME_ROUTE = "home"
+    const val RECIPE_LIST_ROUTE = "recipes" // O como la hayas llamado
+    const val PREPARATION_ROUTE_WITH_ARG = "preparation/{recipeId}"
+    const val RECIPE_ARGUMENT = "recipeId"
+    const val HISTORIAL_ROUTE = "historial"
+
+    // Añade la ruta para userProgres aquí también si quieres consistencia
+    const val USER_PROGRESS_ROUTE_WITH_ARG = "userProgress/{id}"
 }
 
 @Composable
 fun MainScreen() {
-    // Controller es el elemento que nos permite navegar entre pantallas. Tiene las acciones
-    // para navegar como naviegate y también la información de en dónde se "encuentra" el usuario
-    // a través del back stack
     val controller = rememberNavController()
+    val navBackStackEntry by controller.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    // Aqui se definen las rutas donde NO se mostrara la BottomBar
+    // Usa las plantillas de ruta completas, incluyendo los placeholders de argumentos
+    val routesWithoutBottomBar =
+        setOf(
+            NavDestinations.PREPARATION_ROUTE_WITH_ARG,
+            // Puedes añadir más rutas aquí si es necesario
+            // "otra_pantalla_sin_bottom_bar"
+        )
+    val showBottomBar =
+        currentRoute != null &&
+            !routesWithoutBottomBar.any { routePattern ->
+                // Si la ruta actual es exactamente igual a una de las rutas sin argumentos
+                if (currentRoute == routePattern) {
+                    true
+                }
+                // Si el patrón de ruta contiene un placeholder de argumento
+                else if (routePattern.contains("{") && routePattern.contains("}")) {
+                    // Crea una expresión regular para que coincida con el patrón de ruta
+                    // Ej: "preparation/{recipeId}" se convierte en "preparation/[^/]+"
+                    val regexPattern = routePattern.replace(Regex("\\{.*?\\}"), "[^/]+")
+                    currentRoute.matches(Regex(regexPattern))
+                }
+                // Si no hay coincidencia
+                else {
+                    false
+                }
+            }
+
     Scaffold(
-        bottomBar = { BottomBar(controller = controller) },
+        bottomBar = {
+            if (showBottomBar) { // Usa la variable corregida
+                BottomBar(controller = controller)
+            }
+        },
     ) { paddingValue ->
-        // NavHost es el componente que funciona como contenedor de los otros componentes que
-        // podrán ser destinos de navegación.
         NavHost(
             navController = controller,
-            startDestination = "home",
+            startDestination = NavDestinations.HOME_ROUTE,
             modifier = Modifier.padding(paddingValue),
         ) {
-            // composable es el componente que se usa para definir un destino de navegación.
-            // Por parámetro recibe la ruta que se utilizará para navegar a dicho destino.
-            composable("home") {
-                // Home es el componente en sí que es el destino de navegación.
+            composable(NavDestinations.HOME_ROUTE) {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     CodiaMainView()
                 }
             }
+
             composable(
-                route = "user/{id}",
+                route = NavDestinations.USER_PROGRESS_ROUTE_WITH_ARG,
                 arguments = listOf(navArgument("id") { type = NavType.StringType }),
             ) { navBackStackEntry ->
-                val id = navBackStackEntry.arguments?.getString("id") ?: "1"
-                UserScreen(userId = id)
+                val userId = navBackStackEntry.arguments?.getInt("id")
+                if (userId != null) {
+                    UserProgressScreen(navController = controller)
+                } else {
+                    Text("Error: ID de usuario no encontrado para Progreso.")
+                }
             }
+
             composable(NavDestinations.RECIPE_LIST_ROUTE) {
                 RecipeScreen(navController = controller)
             }
+
             composable(
                 route = NavDestinations.PREPARATION_ROUTE_WITH_ARG,
-                arguments =
-                    listOf(
-                        navArgument(NavDestinations.RECIPE_ARGUMENT) { // NavDestinations.RECIPE_ARGUMENT es "recipeId"
-                            type = NavType.IntType // El tipo se define directamente aquí
-                        },
-                    ),
-            ) { // El backStackEntry ya no se usa directamente aquí si el ViewModel lo maneja
+                arguments = listOf(navArgument(NavDestinations.RECIPE_ARGUMENT) { type = NavType.IntType }),
+            ) {
                 PreparationScreen(navController = controller)
             }
-            composable(route = NavDestinations.HISTORIAL) {
-                // Aquí podrías agregar una pantalla de favoritos si es necesario
+
+            composable(NavDestinations.HISTORIAL_ROUTE) {
                 HistoryScreen(navController = controller)
             }
         }

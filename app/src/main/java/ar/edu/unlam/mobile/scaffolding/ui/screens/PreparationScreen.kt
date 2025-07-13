@@ -1,5 +1,6 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -30,6 +31,7 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.RestaurantMenu
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
@@ -57,7 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import ar.edu.unlam.mobile.scaffolding.data.model.ingredients.UsedIngredient
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.NutritionalValue
 import ar.edu.unlam.mobile.scaffolding.ui.components.ClickableRatingBar
 import ar.edu.unlam.mobile.scaffolding.ui.components.RatingBar
 import ar.edu.unlam.mobile.scaffolding.ui.components.TopBar
@@ -69,14 +71,12 @@ fun PreparationScreen(
     navController: NavController,
 ) {
     val recipe by viewModel.recipe.collectAsState()
+    val uiUsedIngredients: List<UiUsedIngredient> by viewModel.uiUsedIngredients.collectAsState()
+
     var ingredientsVisible by remember { mutableStateOf(true) }
 
     val back: (() -> Unit)? = {
         navController.popBackStack()
-    }
-
-    val onToggleFavorite: (Int) -> Unit = { recipeId ->
-        viewModel.toggleFavorite(recipeId) // Asume que tienes un ID en tu receta
     }
 
     var userSelectedRating by remember(recipe?.rating) {
@@ -143,7 +143,7 @@ fun PreparationScreen(
                         // Botón de Corazón (Favorito)
                         recipe?.let { recipe -> // Solo muestra el botón si la receta está cargada
                             IconButton(
-                                onClick = { onToggleFavorite(recipe.id) }, // Llama a la función del ViewModel
+                                onClick = { viewModel.toggleFavorite(recipe.id) }, // Llama a la función del ViewModel
                                 modifier =
                                     Modifier
                                         .align(Alignment.CenterEnd) // Corazón a la derecha
@@ -166,7 +166,7 @@ fun PreparationScreen(
                 Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween, // Esto es clave
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         // Porciones (a la izquierda)
@@ -176,7 +176,7 @@ fun PreparationScreen(
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.SemiBold,
                             )
-                        } ?: Spacer(modifier = Modifier.weight(1f)) // Ocupa espacio si no hay porciones para mantener el rating a la derecha
+                        } ?: Spacer(modifier = Modifier.weight(1f))
 
                         // Rating (a la derecha)
                         recipe?.rating?.let { ratingValue ->
@@ -200,68 +200,77 @@ fun PreparationScreen(
             // Lista de ingredientes
             item {
                 ExpandableSection(
-                    title = "Ingredientes",
+                    title = "Ingredientes (${uiUsedIngredients.size})",
                     isVisible = ingredientsVisible,
                     onHeaderClick = { ingredientsVisible = !ingredientsVisible },
                 ) {
-                    recipe?.usedIngredients?.takeIf { it.isNotEmpty() }
-                        ?.let { currentUsedIngredients ->
-                            val usedIngredientPairs = currentUsedIngredients.chunked(2)
+                    if (uiUsedIngredients.isNotEmpty()) {
+                        Log.d("PrepScreen", "Hay ${uiUsedIngredients.size} UiUsedIngredients para mostrar.")
+                        val usedIngredientPairs = uiUsedIngredients.chunked(2)
 
-                            Column(
-                                modifier =
-                                    Modifier.padding(
-                                        horizontal = 8.dp,
-                                        vertical = 8.dp,
-                                    ),
-                                verticalArrangement = Arrangement.spacedBy(8.dp), // Espacio entre filas de Cards
-                            ) {
-                                usedIngredientPairs.forEach { pair ->
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp), // Espacio entre Cards en una fila
-                                    ) {
-                                        // Card para el primer ingrediente del par
-                                        Box(modifier = Modifier.weight(1f)) {
-                                            IngredientCard(usedIngredient = pair[0])
-                                        }
+                        Column(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            usedIngredientPairs.forEach { pair ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    // Card para el primer ingrediente del par
+                                    Box(modifier = Modifier.weight(1f)) {
+                                        IngredientCard(uiUsedIngredient = pair[0])
+                                    }
 
-                                        // Card para el segundo ingrediente del par (si existe)
-                                        Box(modifier = Modifier.weight(1f)) {
-                                            if (pair.size > 1) {
-                                                IngredientCard(usedIngredient = pair[1])
-                                            } else {
-                                                Spacer(Modifier.fillMaxWidth()) // Mantiene la estructura si solo hay un item
-                                            }
+                                    // Card para el segundo ingrediente del par (si existe)
+                                    Box(modifier = Modifier.weight(1f)) {
+                                        if (pair.size > 1) {
+                                            IngredientCard(uiUsedIngredient = pair[1])
+                                        } else {
+                                            Spacer(Modifier.fillMaxWidth())
                                         }
                                     }
                                 }
                             }
-                        } ?: Text(
-                        "No hay ingredientes disponibles.",
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    )
+                        }
+                    } else {
+                        Log.d("PrepScreen", "uiStateUsedIngredients está VACÍO. Mostrando 'No hay ingredientes disponibles'.")
+                        Text(
+                            "No hay ingredientes disponibles.",
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        )
+                    }
                 }
             }
 
+            // Usamos un ElevatedCard para un estilo similar, o puedes replicar tu Column de "Consejo"
+            if (recipe?.nutritionalValue != null) {
+                item { Spacer(modifier = Modifier.height(16.dp)) }
+                item {
+                    NutritionalInfoCard(nutritionalValue = recipe?.nutritionalValue)
+                }
+            }
+
+            // Tarjeta de Consejo
             recipe?.note?.takeIf { it.isNotBlank() }?.let { tipText ->
-                item { Spacer(modifier = Modifier.height(16.dp)) } // Espacio antes del consejo
+                item { Spacer(modifier = Modifier.height(16.dp)) }
 
                 item {
                     Column(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp) // Padding lateral para la caja del consejo
-                                .clip(RoundedCornerShape(8.dp)) // Esquinas redondeadas para la caja
-                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)) // Fondo gris claro
-                                .padding(all = 12.dp), // Padding interno de la caja
+                                .padding(horizontal = 16.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.7f))
+                                .padding(all = 12.dp),
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
+                            // Icono de bombilla
                             Icon(
-                                imageVector = Icons.Filled.Lightbulb, // Icono de bombilla
+                                imageVector = Icons.Filled.Lightbulb,
                                 contentDescription = "Consejo",
-                                tint = MaterialTheme.colorScheme.primary, // Color del icono
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(20.dp),
                             )
                             Spacer(modifier = Modifier.width(8.dp))
@@ -280,7 +289,7 @@ fun PreparationScreen(
                         )
                     }
                 }
-                item { Spacer(modifier = Modifier.height(16.dp)) } // Espacio después del consejo
+                item { Spacer(modifier = Modifier.height(16.dp)) }
             }
 
             // Encabezado para la sección de Pasos de Preparación
@@ -326,7 +335,7 @@ fun PreparationScreen(
                                     Modifier
                                         .defaultMinSize(minWidth = 70.dp) // Asegura un ancho mínimo para "Paso XX"
                                         .clip(RoundedCornerShape(8.dp))
-                                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                                        .background(MaterialTheme.colorScheme.tertiary)
                                         .padding(horizontal = 8.dp, vertical = 6.dp), // Padding interno de la caja del número
                             ) {
                                 Text(
@@ -358,7 +367,7 @@ fun PreparationScreen(
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(24.dp)) } // Más espacio antes de esta sección
+            item { Spacer(modifier = Modifier.height(24.dp)) }
 
             // Puntuación de la receta
             item {
@@ -367,7 +376,7 @@ fun PreparationScreen(
                         Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally, // Centra el contenido de la columna
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
                         text = "¿Qué te pareció la receta?",
@@ -381,15 +390,11 @@ fun PreparationScreen(
                         currentRating = userSelectedRating,
                         onRatingChanged = { newRating ->
                             userSelectedRating = newRating
-                            // Opcionalmente, puedes enviar el rating inmediatamente al hacer clic
-                            // o esperar a que el usuario presione un botón de "Enviar".
-                            // Por ahora, solo actualizamos el estado local.
-                            // Si quieres enviar inmediatamente:
                             recipe?.id?.let { id ->
                                 onSubmitRating(id, newRating)
                             }
                         },
-                        starSize = 36.dp, // Estrellas un poco más grandes para facilitar el clic
+                        starSize = 36.dp,
                     )
 
                     // Opcional: Botón para confirmar el rating
@@ -471,41 +476,40 @@ fun ExpandableSection(
 }
 
 @Composable
-fun IngredientCard(usedIngredient: UsedIngredient) {
+fun IngredientCard(uiUsedIngredient: UiUsedIngredient) {
     // Puedes usar Card o ElevatedCard para diferentes efectos visuales
-    ElevatedCard( // O Card()
+    ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), // Sombra para ElevatedCard
     ) {
         Column {
             AsyncImage(
-                model = usedIngredient.ingredient.imageUrl,
-                contentDescription = "Imagen de ${usedIngredient.ingredient.name}",
+                model = uiUsedIngredient.imageUrl,
+                contentDescription = "Imagen de ${uiUsedIngredient.name}",
                 modifier =
                     Modifier
                         .fillMaxWidth()
                         .aspectRatio(16f / 9f),
-                // O la relación de aspecto que prefieras para la imagen
-                contentScale = ContentScale.Crop, // Para que la imagen cubra el área asignada
+                contentScale = ContentScale.Crop,
             )
             Column(Modifier.padding(all = 8.dp)) {
                 Text(
-                    text = usedIngredient.ingredient.name,
-                    style = MaterialTheme.typography.titleSmall, // O titleMedium
+                    text = uiUsedIngredient.name,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis, // Por si el nombre es muy largo
+                    overflow = TextOverflow.Ellipsis,
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "Tipo: ${usedIngredient.ingredient.type}", // Asumiendo que type es un String o Enum.toString()
+                    text = "Tipo: ${uiUsedIngredient.typeName}",
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Cantidad: ${usedIngredient.quantity}",
+                    text = "Cantidad: ${uiUsedIngredient.quantity}",
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -513,4 +517,70 @@ fun IngredientCard(usedIngredient: UsedIngredient) {
             }
         }
     }
+}
+
+@Composable
+fun NutritionalInfoCard(nutritionalValue: NutritionalValue?) {
+    if (nutritionalValue == null) {
+        // No mostrar nada si no hay datos nutricionales
+        return
+    }
+
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp) // Padding lateral para la caja, igual que el consejo
+                .clip(RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.7f)) // Fondo similar al consejo
+                .padding(all = 12.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Filled.RestaurantMenu,
+                contentDescription = "Información Nutricional",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp),
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Información Nutricional (por porción):",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Mostrar cada valor nutricional si está disponible
+        NutritionalDetailRow("Valor General:", "${nutritionalValue.generalValue}")
+        NutritionalDetailRow("Calorías:", "${nutritionalValue.calories} kcal")
+        NutritionalDetailRow("Proteínas:", "${nutritionalValue.protein} g")
+        NutritionalDetailRow("Carbohidratos:", "${nutritionalValue.carbs} g")
+        NutritionalDetailRow("Grasas:", "${nutritionalValue.fats} g")
+    }
+}
+
+@Composable
+fun NutritionalDetailRow(
+    label: String,
+    value: String,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+    Spacer(modifier = Modifier.height(4.dp))
 }

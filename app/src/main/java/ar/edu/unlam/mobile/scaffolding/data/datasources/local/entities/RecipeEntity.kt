@@ -1,11 +1,10 @@
 package ar.edu.unlam.mobile.scaffolding.data.datasources.local.entities
 
-import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import ar.edu.unlam.mobile.scaffolding.data.model.recipes.Category
-import ar.edu.unlam.mobile.scaffolding.data.model.recipes.Difficulty
-import ar.edu.unlam.mobile.scaffolding.data.model.recipes.NutritionalValue
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.Category
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.Difficulty
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.NutritionalValue
 
 @Entity(tableName = "recipes")
 data class RecipeEntity(
@@ -22,6 +21,5 @@ data class RecipeEntity(
     val tags: List<Category>, // Etiquetas (sin gluten, vegana, baja en carbohidratos, etc.)
     val rating: Float = 0f, // Puntaje (opcional)
     val isFavorite: Boolean = false,
-    @Embedded
     val nutritionalValue: NutritionalValue, // Valor nutricional (opcional) (calorías, proteínas, grasas, etc.)
 )

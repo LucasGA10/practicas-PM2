@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import com.ar.unlam.ddi.ui.theme.PrimaryGreenDark
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,7 +35,7 @@ fun TopBar(
             },
             colors =
                 TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = PrimaryGreenDark,
+                    containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = Color.White,
                     navigationIconContentColor = Color.White,
                 ),

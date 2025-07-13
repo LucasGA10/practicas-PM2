@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -53,11 +52,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import ar.edu.unlam.mobile.scaffolding.data.model.SortCriterion
-import ar.edu.unlam.mobile.scaffolding.data.model.recipes.Category
-import ar.edu.unlam.mobile.scaffolding.data.model.recipes.RecipeListItem
+import ar.edu.unlam.mobile.scaffolding.domain.model.SortCriterion
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.Category
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.RecipeListItem
 import ar.edu.unlam.mobile.scaffolding.ui.components.HistoryRecipeCard
-import kotlin.unaryMinus
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -71,7 +69,6 @@ fun HistoryScreen(
 
     val allAvailableCategories: List<Category> = Category.entries
     var showFilters by remember { mutableStateOf(false) }
-    val back: (() -> Unit)? = { navController.popBackStack() }
 
     var showSortMenu by remember { mutableStateOf(false) }
 
@@ -173,7 +170,7 @@ fun HistoryScreen(
                             recipe = recipe,
                             onFavoriteClick = { viewModel.toggleFavorite(recipe.id) },
                             onClickAction = {
-                                navController.navigate("Preparation_screen/${recipe.id}")
+                                navController.navigate("preparation/${recipe.id}")
                             },
                         )
                         if (recipes.indexOf(recipe) < recipes.size - 1) {
@@ -390,7 +387,7 @@ fun FavoritesScreen(
             HistoryRecipeCard(
                 recipe = recipe,
                 onFavoriteClick = { viewModel.toggleFavorite(recipe.id) },
-                onClickAction = { navController.navigate("Preparation_screen/${recipe.id}") },
+                onClickAction = { navController.navigate("preparation/${recipe.id}") },
             )
         }
     }

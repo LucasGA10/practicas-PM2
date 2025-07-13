@@ -27,9 +27,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ar.edu.unlam.mobile.scaffolding.data.model.recipes.Category
-import ar.edu.unlam.mobile.scaffolding.data.model.recipes.Difficulty
-import ar.edu.unlam.mobile.scaffolding.data.model.recipes.RecipeListItem
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.Category
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.Difficulty
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.RecipeListItem
 import coil.compose.AsyncImage
 import com.ar.unlam.ddi.ui.theme.PrimaryGreen
 import com.ar.unlam.ddi.ui.theme.PrimaryGreenDark

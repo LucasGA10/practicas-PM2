@@ -1,4 +1,4 @@
-package ar.edu.unlam.mobile.scaffolding.data.model.recipes
+package ar.edu.unlam.mobile.scaffolding.domain.model.recipes
 
 data class RecipeListItem(
     val id: Int,

@@ -3,11 +3,11 @@ package ar.edu.unlam.mobile.scaffolding.ui.screens
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ar.edu.unlam.mobile.scaffolding.data.model.SortCriterion
-import ar.edu.unlam.mobile.scaffolding.data.model.recipes.Category
-import ar.edu.unlam.mobile.scaffolding.data.model.recipes.Difficulty
-import ar.edu.unlam.mobile.scaffolding.data.model.recipes.RecipeListItem
 import ar.edu.unlam.mobile.scaffolding.data.repositories.RecipesRepository
+import ar.edu.unlam.mobile.scaffolding.domain.model.SortCriterion
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.Category
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.Difficulty
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.RecipeListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow

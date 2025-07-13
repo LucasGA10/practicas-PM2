@@ -1,4 +1,4 @@
-package ar.edu.unlam.mobile.scaffolding.data.model
+package ar.edu.unlam.mobile.scaffolding.domain.model
 
 enum class SortCriterion {
     NONE, // Podría ser el estado por defecto o "Por Defecto" (orden del repositorio)

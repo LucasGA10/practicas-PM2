@@ -3,11 +3,12 @@ package ar.edu.unlam.mobile.scaffolding.ui.screens
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ar.edu.unlam.mobile.scaffolding.data.model.SortCriterion
-import ar.edu.unlam.mobile.scaffolding.data.model.recipes.Category
-import ar.edu.unlam.mobile.scaffolding.data.model.recipes.Difficulty
-import ar.edu.unlam.mobile.scaffolding.data.model.recipes.RecipeListItem
-import ar.edu.unlam.mobile.scaffolding.data.repositories.RecipesRepository
+import ar.edu.unlam.mobile.scaffolding.domain.model.SortCriterion
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.Category
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.Difficulty
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.RecipeListItem
+import ar.edu.unlam.mobile.scaffolding.domain.usecases.GetRecipeListItemsUseCase
+import ar.edu.unlam.mobile.scaffolding.domain.usecases.ToggleFavoriteRecipeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,10 +27,10 @@ import javax.inject.Inject
 class RecipesViewModel
     @Inject
     constructor(
-        private val recipesRepository: RecipesRepository,
+        private val getRecipeListItemsUseCase: GetRecipeListItemsUseCase,
+        private val toggleFavoriteRecipeUseCase: ToggleFavoriteRecipeUseCase,
     ) : ViewModel() {
-        private val _recipeListItems = MutableStateFlow<List<RecipeListItem>>(emptyList())
-
+        private val recipeListItemsSource = MutableStateFlow<List<RecipeListItem>>(emptyList())
         private val _selectedFilterTags = MutableStateFlow<List<Category>>(emptyList())
         val selectedFilterTags: StateFlow<List<Category>> = _selectedFilterTags.asStateFlow()
 
@@ -41,7 +42,7 @@ class RecipesViewModel
 
         val recipes: StateFlow<List<RecipeListItem>> =
             combine(
-                _recipeListItems,
+                recipeListItemsSource,
                 _selectedFilterTags,
                 _sortCriterion,
             ) { sourceItems, tags, sortOrder ->
@@ -51,12 +52,8 @@ class RecipesViewModel
                     if (tags.isEmpty()) {
                         sourceItems
                     } else {
-                        // Asegúrate que RecipeListItem tenga 'tags' y que sean comparables a Category
                         sourceItems.filter { recipeItem ->
-                            // Si recipeItem.tags es List<Category>
                             tags.all { selectedTag -> recipeItem.tags.any { itemTag -> itemTag == selectedTag } }
-                            // Si recipeItem.tags es List<String> y Category tiene un campo 'tagName' String
-                            // tags.all { selectedTag -> recipeItem.tags.any { itemTagName -> itemTagName == selectedTag.tagName } }
                         }
                     }
 
@@ -73,7 +70,7 @@ class RecipesViewModel
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000L),
-                initialValue = emptyList<RecipeListItem>(),
+                initialValue = emptyList(),
             )
 
         private var fetchJob: Job? = null
@@ -87,17 +84,15 @@ class RecipesViewModel
             fetchJob =
                 viewModelScope.launch {
                     _isLoading.value = true
-                    // recipesRepository.getRecipeListItems() DEBE devolver un Flow
-                    // que observa la base de datos para que esto funcione automáticamente.
-                    recipesRepository.getRecipeListItems()
+                    getRecipeListItemsUseCase() // USAR CASO DE USO
                         .catch { exception ->
                             Log.e("RecipesViewModel", "Error fetching recipe list items", exception)
-                            _recipeListItems.value = emptyList()
+                            recipeListItemsSource.value = emptyList() // Actualiza la fuente interna
                             _isLoading.value = false
                         }
                         .collectLatest { items ->
                             Log.d("RecipesViewModel", "Fetched recipe list items. Count: ${items.size}")
-                            _recipeListItems.value = items // Actualiza el Flow fuente
+                            recipeListItemsSource.value = items // Actualiza la fuente interna
                             _isLoading.value = false
                         }
                 }
@@ -127,27 +122,18 @@ class RecipesViewModel
             Log.d("RecipesViewModel", "Sort criterion set to: $criterion")
         }
 
-        // No pude hacer que funcione bien, no muestra el cambio al instante
         fun toggleFavorite(recipeId: Int) {
             viewModelScope.launch {
-                // Necesitamos saber el estado actual de isFavorite para invertirlo.
-                // La forma más robusta es obtener el estado actual del objeto que ya tienes en la UI
-                // PERO, idealmente, el Flow ya nos dará el estado.
-
-                // Lo que necesitas hacer es llamar al repositorio para que actualice la BD.
-
-                // Necesitamos saber el estado actual para poder invertirlo.
-                // La forma más directa es encontrar el item en la lista actual que se está mostrando.
-                val currentRecipeItem = _recipeListItems.value.find { it.id == recipeId }
+                val currentRecipeItem = recipeListItemsSource.value.find { it.id == recipeId } // Busca en la fuente interna
 
                 if (currentRecipeItem != null) {
                     val newFavoriteState = !currentRecipeItem.isFavorite
                     try {
-                        recipesRepository.setRecipeFavoriteStatus(recipeId, newFavoriteState)
+                        toggleFavoriteRecipeUseCase(recipeId, newFavoriteState) // USAR CASO DE USO
                         Log.d("RecipesViewModel", "Toggled favorite for ID $recipeId to $newFavoriteState. DB update initiated.")
+                        // El Flow debería actualizarse automáticamente si el repositorio emite cambios
                     } catch (e: Exception) {
                         Log.e("RecipesViewModel", "Error toggling favorite for ID $recipeId", e)
-                        // Considera mostrar un mensaje de error al usuario
                     }
                 } else {
                     Log.w("RecipesViewModel", "Recipe with ID $recipeId not found in current list for toggling favorite.")
