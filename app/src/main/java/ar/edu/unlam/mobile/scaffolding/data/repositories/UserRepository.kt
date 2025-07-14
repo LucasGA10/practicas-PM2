@@ -9,6 +9,9 @@ interface UserRepository {
     suspend fun newUser(newUser: User)
 
     fun getCurrentUser(): Flow<User?>
+
+    fun updateUser(user: User): String
+
     suspend fun getUserById(id: Int): User?
 
     suspend fun saveUser(user: User)
@@ -20,9 +23,11 @@ interface UserRepository {
         age: Int,
         gender: Gender,
         dietGoal: DietGoal,
-        selectedRestrictions: List<String>
+        selectedRestrictions: List<String>,
     ): Result<Unit>
 
-    fun updateUser(user: User) : String
-
+    suspend fun addRecipeToHistory(
+        userId: Int,
+        recipeId: Int,
+    ): Result<Unit>
 }

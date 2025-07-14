@@ -1,7 +1,6 @@
 package ar.edu.unlam.mobile.scaffolding.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -28,12 +27,13 @@ fun TopBar(
     onNavigateBack: (() -> Unit)? = null,
     // Nuevos parámetros para personalizar colores
     // Por defecto, usa los colores primarios del tema (tu verde)
-    colors: TopAppBarColors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-        containerColor = MaterialTheme.colorScheme.primary, // Verde por defecto
-        titleContentColor = MaterialTheme.colorScheme.onPrimary, // Blanco por defecto (sobre verde)
-        navigationIconContentColor = MaterialTheme.colorScheme.onPrimary, // Blanco por defecto (sobre verde)
-    ),
-    modifier: Modifier = Modifier // Añadir modifier para flexibilidad
+    colors: TopAppBarColors =
+        TopAppBarDefaults.centerAlignedTopAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primary, // Verde por defecto
+            titleContentColor = MaterialTheme.colorScheme.onPrimary, // Blanco por defecto (sobre verde)
+            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary, // Blanco por defecto (sobre verde)
+        ),
+    modifier: Modifier = Modifier, // Añadir modifier para flexibilidad
 ) {
     CenterAlignedTopAppBar(
         title = {
@@ -57,9 +57,11 @@ fun TopBar(
             }
         },
         colors = colors, // Usa los colores pasados o los por defecto
-        modifier = modifier // Pasa el modifier aquí
-            .shadow(elevation = 0.dp) // Quita la sombra explícitamente (opcional si lo de abajo funciona)
-            .background(Color.White), // Asegura el fondo si el tinte es un problema
+        modifier =
+            modifier // Pasa el modifier aquí
+                .shadow(elevation = 0.dp) // Quita la sombra explícitamente (opcional si lo de abajo funciona)
+                .background(Color.White),
+        // Asegura el fondo si el tinte es un problema
     )
 }
 

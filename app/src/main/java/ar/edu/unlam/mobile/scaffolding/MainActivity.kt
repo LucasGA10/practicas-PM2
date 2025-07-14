@@ -25,11 +25,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import ar.edu.unlam.mobile.scaffolding.ui.components.BottomBar
-import ar.edu.unlam.mobile.scaffolding.ui.screens.DietFormScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.recipes.HistoryScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.recipes.PreparationScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.recipes.RecipeScreen
-import ar.edu.unlam.mobile.scaffolding.ui.screens.UserProgressScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.user.DietFormScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.user.UserProgressScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.user.UserScreen
 import ar.edu.unlam.mobile.scaffolding.ui.theme.DietappV2Theme
 import com.ar.unlam.ddi.ui.CodiaMainView
 import dagger.hilt.android.AndroidEntryPoint
@@ -62,6 +63,7 @@ object NavDestinations {
     const val PREPARATION_ROUTE_WITH_ARG = "preparation/{recipeId}"
     const val RECIPE_ARGUMENT = "recipeId"
     const val HISTORY_ROUTE = "historial"
+    const val USER_PROFILE_ROUTE = "user"
     const val USER_PROGRESS_ROUTE_WITH_ARG = "userProgress/{id}"
 }
 
@@ -76,7 +78,6 @@ fun MainScreen() {
     val routesWithoutBottomBar =
         setOf(
             NavDestinations.DIET_FORM_ROUTE,
-
             NavDestinations.PREPARATION_ROUTE_WITH_ARG,
             // Puedes añadir más rutas aquí si es necesario
             // "otra_pantalla_sin_bottom_bar"
@@ -149,6 +150,10 @@ fun MainScreen() {
 
             composable(NavDestinations.HISTORY_ROUTE) {
                 HistoryScreen(navController = controller)
+            }
+
+            composable(NavDestinations.USER_PROFILE_ROUTE) {
+                UserScreen(navController = controller)
             }
         }
     }

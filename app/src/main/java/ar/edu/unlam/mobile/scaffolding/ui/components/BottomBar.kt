@@ -1,8 +1,8 @@
 package ar.edu.unlam.mobile.scaffolding.ui.components
 
-import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Leaderboard
 import androidx.compose.material.icons.rounded.History
@@ -71,12 +71,13 @@ fun BottomBar(controller: NavHostController) {
         // --- Progreso Item ---
         val userProgressRoutePattern = NavDestinations.USER_PROGRESS_ROUTE_WITH_ARG
 
-        val isProgressSelected = currentDestination?.hierarchy?.any { navDest ->
-            navDest.route == userProgressRoutePattern
-        } == true
+        val isProgressSelected =
+            currentDestination?.hierarchy?.any { navDest ->
+                navDest.route == userProgressRoutePattern
+            } == true
 
         NavigationBarItem(
-            //Usa la logica simplificada para verificar el ID.
+            // Usa la logica simplificada para verificar el ID.
             selected = isProgressSelected,
             onClick = {
                 val routeToNavigate = userProgressRoutePattern.replace("{id}", currentUserId)
@@ -92,7 +93,7 @@ fun BottomBar(controller: NavHostController) {
                 }
 
                 if (!currentlyOnTarget) {
-                    //isProgressSelected no verifica el ID.
+                    // isProgressSelected no verifica el ID.
                     controller.navigate(routeToNavigate) {
                         launchSingleTop = true
                         restoreState = true
@@ -171,7 +172,6 @@ fun BottomBar(controller: NavHostController) {
                     controller.navigate(historyRoute) {
                         launchSingleTop = true
                         restoreState = true
-                        // Considera popUpTo
                     }
                 }
             },
@@ -191,6 +191,41 @@ fun BottomBar(controller: NavHostController) {
                 if (isHistorialSelected) {
                     Text(
                         text = "Historial",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.White,
+                    )
+                }
+            },
+            alwaysShowLabel = false,
+        )
+        val userProfileRoute = NavDestinations.USER_PROFILE_ROUTE // Asume que tienes "user" o "profile" en NavDestinations
+        val isUserProfileSelected = currentDestination?.hierarchy?.any { it.route == userProfileRoute } == true
+        NavigationBarItem(
+            selected = isUserProfileSelected,
+            onClick = {
+                if (!isUserProfileSelected) {
+                    controller.navigate(userProfileRoute) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            },
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.AccountCircle, // Ícono para el perfil
+                    contentDescription = "Perfil",
+                )
+            },
+            colors =
+                NavigationBarItemDefaults.colors(
+                    selectedIconColor = Color.White,
+                    indicatorColor = Color.Transparent,
+                    unselectedIconColor = MaterialTheme.colorScheme.secondary,
+                ),
+            label = {
+                if (isUserProfileSelected) {
+                    Text(
+                        text = "Perfil",
                         style = MaterialTheme.typography.labelMedium,
                         color = Color.White,
                     )

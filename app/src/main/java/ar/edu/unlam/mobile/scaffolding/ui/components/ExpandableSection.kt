@@ -61,16 +61,16 @@ fun ExpandableSection(
             // Modifica aquí la duración de las animaciones
             enter =
                 fadeIn(animationSpec = tween(durationMillis = 100)) +
-                        slideInVertically(
-                            animationSpec = tween(durationMillis = 150),
-                            initialOffsetY = { fullHeight -> -fullHeight / 4 },
-                        ),
+                    slideInVertically(
+                        animationSpec = tween(durationMillis = 150),
+                        initialOffsetY = { fullHeight -> -fullHeight / 4 },
+                    ),
             exit =
                 fadeOut(animationSpec = tween(durationMillis = 100)) +
-                        slideOutVertically(
-                            animationSpec = tween(durationMillis = 150),
-                            targetOffsetY = { fullHeight -> -fullHeight / 4 },
-                        ),
+                    slideOutVertically(
+                        animationSpec = tween(durationMillis = 150),
+                        targetOffsetY = { fullHeight -> -fullHeight / 4 },
+                    ),
         ) {
             Column {
                 content()

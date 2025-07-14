@@ -22,6 +22,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -68,15 +71,12 @@ fun PreparationScreen(
 
     var ingredientsVisible by remember { mutableStateOf(true) }
 
-    val back: (() -> Unit)? = {
-        navController.popBackStack()
-    }
+    val back: (() -> Unit)? = { navController.popBackStack() }
 
+    val showRatingDialog = viewModel.showRatingDialog.collectAsState().value
+    val currentDialogRating = viewModel.currentRatingForDialog.collectAsState().value
     var userSelectedRating by remember(recipe?.rating) {
         mutableFloatStateOf(recipe?.rating ?: 0f)
-    }
-    val onSubmitRating: (Int, Float) -> Unit = { recipeId, newRating ->
-        viewModel.updateRecipeRating(recipeId, newRating)
     }
 
     Scaffold(
@@ -89,7 +89,8 @@ fun PreparationScreen(
                     .padding(paddingValues),
         ) {
             item {
-                Box( // Box principal para la cabecera de la imagen
+                Box(
+                    // Box principal para la cabecera de la imagen
                     modifier =
                         Modifier
                             .fillMaxWidth()
@@ -136,7 +137,7 @@ fun PreparationScreen(
                         // Botón de Corazón (Favorito)
                         recipe?.let { recipe -> // Solo muestra el botón si la receta está cargada
                             IconButton(
-                                onClick = { viewModel.toggleFavorite(recipe.id) }, // Llama a la función del ViewModel
+                                onClick = { viewModel.toggleFavorite(recipe.id) },
                                 modifier =
                                     Modifier
                                         .align(Alignment.CenterEnd) // Corazón a la derecha
@@ -364,47 +365,47 @@ fun PreparationScreen(
 
             // Puntuación de la receta
             item {
-                Column(
+                Button(
+                    onClick = { viewModel.onRecipeCompletedClicked() },
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                            .padding(16.dp),
                 ) {
-                    Text(
-                        text = "¿Qué te pareció la receta?",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(bottom = 8.dp),
-                    )
+                    Text("¡Receta Terminada!")
+                }
 
-                    // Estrellas clickeables para nuevo rating
-                    ClickableRatingBar(
-                        currentRating = userSelectedRating,
-                        onRatingChanged = { newRating ->
-                            userSelectedRating = newRating
-                            recipe?.id?.let { id ->
-                                onSubmitRating(id, newRating)
+                if (showRatingDialog && recipe != null) {
+                    AlertDialog(
+                        onDismissRequest = { viewModel.onRatingDialogDismiss() },
+                        title = { Text("¡Excelente!") },
+                        text = {
+                            Column {
+                                Text("¿Qué tal te pareció la receta?")
+                                Spacer(modifier = Modifier.height(16.dp))
+                                ClickableRatingBar(
+                                    currentRating = userSelectedRating,
+                                    onRatingChanged = { newRating ->
+                                        userSelectedRating = newRating
+                                        viewModel.onDialogRatingChanged(newRating)
+                                    },
+                                    starSize = 36.dp,
+                                )
                             }
                         },
-                        starSize = 36.dp,
-                    )
-
-                    // Opcional: Botón para confirmar el rating
-                    // Si prefieres que el usuario confirme antes de enviar:
-                    /*
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(
-                        onClick = {
-                            recipe?.id?.let { id ->
-                                onSubmitRating(id, userSelectedRating)
+                        confirmButton = {
+                            Button(onClick = {
+                                viewModel.onRatingSubmitted(currentDialogRating)
+                            }) {
+                                Text("Guardar Puntuación")
                             }
                         },
-                        enabled = recipe != null && userSelectedRating > 0f // Habilita si hay rating
-                    ) {
-                        Text("Enviar Calificación")
-                    }
-                     */
+                        dismissButton = {
+                            TextButton(onClick = { viewModel.onRatingDialogDismiss() }) {
+                                Text("Cancelar")
+                            }
+                        },
+                    )
                 }
             }
 
@@ -456,4 +457,3 @@ fun IngredientCard(uiUsedIngredient: UiUsedIngredient) {
         }
     }
 }
-

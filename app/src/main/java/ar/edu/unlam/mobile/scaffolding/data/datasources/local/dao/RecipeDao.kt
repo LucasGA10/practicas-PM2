@@ -9,6 +9,7 @@ import androidx.room.Update
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.entities.RecipeEntity
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.entities.RecipeWithItsUsedIngredients
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.entities.UsedIngredientEntity
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.RecipeHistoryItem
 import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.RecipeListItem
 import kotlinx.coroutines.flow.Flow
 
@@ -29,6 +30,9 @@ interface RecipeDao {
 
     @Query("SELECT id, name, imageUrl, category, difficulty, portions, tags, rating, isFavorite FROM recipes")
     fun getRecipeListItems(): Flow<List<RecipeListItem>>
+
+    @Query("SELECT id, name, imageUrl as imageUrl, category, portions, tags, isFavorite as isFavorite FROM recipes WHERE id IN (:ids)")
+    suspend fun getRecipeHistoryItemsByIds(ids: List<Int>): List<RecipeHistoryItem>
 
     @Query("SELECT * FROM used_ingredients WHERE recipeId = :recipeId")
     fun getUsedIngredientsForRecipe(recipeId: Int): Flow<List<UsedIngredientEntity>>

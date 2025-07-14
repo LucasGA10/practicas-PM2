@@ -5,6 +5,7 @@ import ar.edu.unlam.mobile.scaffolding.data.datasources.local.dao.RecipeDao
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.entities.RecipeEntity
 import ar.edu.unlam.mobile.scaffolding.domain.model.ingredients.UsedIngredient
 import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.Recipe
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.RecipeHistoryItem
 import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.RecipeListItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -35,6 +36,25 @@ class RecipesRepositoryImpl
                         isFavorite = dbItem.isFavorite,
                     )
                 }
+            }
+        }
+
+        override suspend fun getRecipeListItemsByIds(ids: List<Int>): List<RecipeHistoryItem> {
+            if (ids.isEmpty()) {
+                return emptyList()
+            }
+            // Asume que tu DAO tiene una función para obtener entidades por una lista de IDs
+            val recipeEntities = recipeDao.getRecipeHistoryItemsByIds(ids)
+            return recipeEntities.map { result ->
+                RecipeHistoryItem(
+                    id = result.id,
+                    name = result.name,
+                    imageUrl = result.imageUrl,
+                    category = result.category,
+                    portions = result.portions,
+                    tags = result.tags,
+                    isFavorite = result.isFavorite,
+                )
             }
         }
 

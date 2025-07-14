@@ -4,7 +4,9 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import ar.edu.unlam.mobile.scaffolding.data.repositories.UserRepository
 import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.Recipe
+import ar.edu.unlam.mobile.scaffolding.domain.model.user.User
 import ar.edu.unlam.mobile.scaffolding.domain.usecases.GetIngredientsByIdsUseCase
 import ar.edu.unlam.mobile.scaffolding.domain.usecases.GetRecipeByIdUseCase
 import ar.edu.unlam.mobile.scaffolding.domain.usecases.ToggleFavoriteRecipeUseCase
@@ -40,9 +42,22 @@ class PreparationViewModel
         private val getIngredientsUseCase: GetIngredientsByIdsUseCase,
         private val toggleFavoriteUseCase: ToggleFavoriteRecipeUseCase,
         private val updateRecipeRatingUseCase: UpdateRecipeRatingUseCase,
+        private val userRepository: UserRepository,
         savedStateHandle: SavedStateHandle,
     ) : ViewModel() {
         private val recipeId: StateFlow<Int?> = MutableStateFlow(savedStateHandle.get<Int>("recipeId"))
+
+        private val _showRatingDialog = MutableStateFlow(false)
+        val showRatingDialog: StateFlow<Boolean> = _showRatingDialog.asStateFlow()
+
+        private val _currentRatingForDialog = MutableStateFlow(0f) // Rating temporal para el diálogo
+        val currentRatingForDialog: StateFlow<Float> = _currentRatingForDialog.asStateFlow()
+
+        private val currentUserId: StateFlow<User?> =
+            userRepository.getCurrentUser().stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+        private val _error = MutableStateFlow<String?>(null)
+        val error: StateFlow<String?> = _error.asStateFlow()
 
         val recipe: StateFlow<Recipe?> =
             recipeId
@@ -72,9 +87,6 @@ class PreparationViewModel
                     started = SharingStarted.WhileSubscribed(5000L),
                     initialValue = null,
                 )
-
-        private val _error = MutableStateFlow<String?>(null)
-        val error: StateFlow<String?> = _error.asStateFlow()
 
         val uiUsedIngredients: StateFlow<List<UiUsedIngredient>> =
             recipe // Depende del Flow<Recipe?>
@@ -166,18 +178,44 @@ class PreparationViewModel
             }
         }
 
-        fun updateRecipeRating(
-            recipeIdToUpdate: Int,
-            newRating: Float,
-        ) {
-            viewModelScope.launch {
-                // La validación del rating puede permanecer aquí
-                val validRating = newRating.coerceIn(0f, 5f)
-                try {
-                    updateRecipeRatingUseCase(recipeIdToUpdate, validRating)
-                } catch (e: Exception) {
-                    _error.value = "Error al actualizar el rating: ${e.message}"
+        fun onRecipeCompletedClicked() {
+            // _currentRatingForDialog.value = 0f
+            _showRatingDialog.value = true
+        }
+
+        fun onRatingDialogDismiss() {
+            _showRatingDialog.value = false
+        }
+
+        fun onRatingSubmitted(rating: Float) {
+            _showRatingDialog.value = false
+            val recipeValue = recipe.value
+            val userId = currentUserId.value?.id
+
+            if (recipeValue != null && userId != null) {
+                viewModelScope.launch {
+                    // 1. Actualizar el rating "general" de la receta (si es diferente de la puntuación del historial)
+                    updateRecipeRatingUseCase(recipeValue.id, rating)
+
+                    // 2. Añadir al historial del usuario
+                    val result = userRepository.addRecipeToHistory(userId, recipeValue.id)
+                    result.fold(
+                        onSuccess = {
+                            Log.d("PrepViewModel", "Receta ${recipeValue.id} añadida al historial con rating $rating")
+                            // Opcional: Mostrar un mensaje de éxito
+                        },
+                        onFailure = { e ->
+                            _error.value = "Error al guardar en historial: ${e.message}"
+                            Log.e("PrepViewModel", "Error al guardar en historial", e)
+                        },
+                    )
                 }
+            } else {
+                _error.value = "No se pudo guardar: receta o usuario no disponibles."
             }
+        }
+
+        fun onDialogRatingChanged(newRating: Float) {
+            _currentRatingForDialog.value = newRating.coerceIn(0f, 5f)
         }
     }
