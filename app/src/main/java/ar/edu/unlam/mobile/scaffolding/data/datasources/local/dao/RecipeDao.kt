@@ -9,6 +9,7 @@ import androidx.room.Update
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.entities.RecipeEntity
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.entities.RecipeWithItsUsedIngredients
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.entities.UsedIngredientEntity
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.NutritionalValue
 import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.RecipeHistoryItem
 import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.RecipeListItem
 import kotlinx.coroutines.flow.Flow
@@ -40,8 +41,11 @@ interface RecipeDao {
     // Esto requiere múltiples pasos (insertar receta, insertar ingredientes si no existen, insertar relaciones)
     // Se maneja mejor en el Repositorio o un UseCase.
 
-    @Query("UPDATE recipes SET isFavorite = :isFavorite WHERE id = :recipeId") // <-- Línea 43 (aproximadamente)
-    suspend fun updateFavoriteStatus(recipeId: Int, isFavorite: Boolean)
+    @Query("UPDATE recipes SET isFavorite = :isFavorite WHERE id = :recipeId")
+    suspend fun updateFavoriteStatus(
+        recipeId: Int,
+        isFavorite: Boolean,
+    )
 
     @Query("UPDATE recipes SET rating = :newRating WHERE id = :recipeId")
     suspend fun updateRating(
@@ -52,4 +56,7 @@ interface RecipeDao {
     @Transaction
     @Query("SELECT * FROM recipes WHERE id = :recipeId")
     fun getRecipeWithItsUsedIngredientsById(recipeId: Int): Flow<RecipeWithItsUsedIngredients>
+
+    @Query("SELECT nutritionalValue FROM recipes WHERE id = :recipeId")
+    suspend fun getNutritionalValueForRecipe(recipeId: Int): NutritionalValue
 }

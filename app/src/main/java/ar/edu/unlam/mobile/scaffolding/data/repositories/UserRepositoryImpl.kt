@@ -8,7 +8,6 @@ import ar.edu.unlam.mobile.scaffolding.domain.model.user.User
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -30,7 +29,7 @@ class UserRepositoryImpl
                     userName = "Lucas",
                     email = "myEmail@mail.com",
                     password = "12345",
-                    imageUrl = "https://videogamejunk.com/img/catalog/b/balatro/jimbo-plush/75a5ef82ee54340fd237570bbdc386ddb7f85d16.jpeg",
+                    imageUrl = "https://img.freepik.com/premium-vector/funny-mango-character_844724-2012.jpg",
                 ),
             )
 
@@ -44,7 +43,7 @@ class UserRepositoryImpl
             )
         }
 
-        override fun getCurrentUser(): Flow<User?> = _userFlow.asStateFlow()
+        override fun getCurrentUser(): Flow<User> = _userFlow
 
         override suspend fun getUserById(id: Int): User? {
             return users.find { it.id == id }
@@ -52,13 +51,9 @@ class UserRepositoryImpl
 
         override suspend fun saveUser(user: User) {
             withContext(ioDispatcher) {
-                // En una DB real, esto sería una inserción o actualización.
-                // Por ahora, si el ID es el mismo que el hardcodeado, lo actualizamos.
-                if (_userFlow.value.id == user.id || _userFlow.value == null) {
+                if (_userFlow.value.id == user.id) {
                     _userFlow.value = user
                 } else {
-                    // Manejar el caso de intentar guardar un usuario diferente si solo esperas uno.
-                    // O expandir para soportar múltiples usuarios si es necesario.
                     println("UserRepositoryImpl: No se puede guardar un usuario diferente en esta implementación simple.")
                 }
             }
@@ -71,7 +66,7 @@ class UserRepositoryImpl
             age: Int,
             gender: Gender,
             dietGoal: DietGoal,
-            selectedRestrictions: List<String>, // Nuevo parámetro
+            selectedRestrictions: List<String>,
         ): Result<Unit> {
             return withContext(ioDispatcher) {
                 // delay(1000) // Simular latencia
@@ -85,7 +80,7 @@ class UserRepositoryImpl
                             age = age,
                             gender = gender,
                             dietGoal = dietGoal,
-                            selectedDietaryRestrictions = selectedRestrictions, // Guardar
+                            selectedDietaryRestrictions = selectedRestrictions,
                         )
                     _userFlow.value = updatedUser
                     Log.d("UserRepositoryImpl", "User profile updated with restrictions: $selectedRestrictions")

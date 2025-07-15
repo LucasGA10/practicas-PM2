@@ -1,23 +1,31 @@
 package ar.edu.unlam.mobile.scaffolding
 
 import android.os.Bundle
-import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.content.res.ResourcesCompat
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -25,10 +33,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import ar.edu.unlam.mobile.scaffolding.ui.components.BottomBar
+import ar.edu.unlam.mobile.scaffolding.ui.screens.AuthViewModel
+import ar.edu.unlam.mobile.scaffolding.ui.screens.DietFormScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.UserAuthState
 import ar.edu.unlam.mobile.scaffolding.ui.screens.recipes.HistoryScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.recipes.PreparationScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.recipes.RecipeScreen
-import ar.edu.unlam.mobile.scaffolding.ui.screens.user.DietFormScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.user.UserProgressScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.user.UserScreen
 import ar.edu.unlam.mobile.scaffolding.ui.theme.DietappV2Theme
@@ -57,6 +67,7 @@ class MainActivity : ComponentActivity() {
 }
 
 object NavDestinations {
+    const val LOADING_ROUTE = "loading"
     const val DIET_FORM_ROUTE = "dietForm"
     const val HOME_ROUTE = "home"
     const val RECIPE_LIST_ROUTE = "recipes" // O como la hayas llamado
@@ -68,92 +79,133 @@ object NavDestinations {
 }
 
 @Composable
-fun MainScreen() {
-    val controller = rememberNavController()
-    val navBackStackEntry by controller.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+fun MainScreen(
+    navController: NavHostController = rememberNavController(), // Renombrado de 'controller' a 'navController' por convención
+    authViewModel: AuthViewModel = hiltViewModel(), // Inyecta el AuthViewModel
+) {
+    val userAuthState by authViewModel.userAuthState.collectAsStateWithLifecycle()
 
-    // Aqui se definen las rutas donde NO se mostrara la BottomBar
-    // Usa las plantillas de ruta completas, incluyendo los placeholders de argumentos
-    val routesWithoutBottomBar =
-        setOf(
-            NavDestinations.DIET_FORM_ROUTE,
-            NavDestinations.PREPARATION_ROUTE_WITH_ARG,
-            // Puedes añadir más rutas aquí si es necesario
-            // "otra_pantalla_sin_bottom_bar"
-        )
-    val showBottomBar =
-        currentRoute != null &&
-            !routesWithoutBottomBar.any { routePattern ->
-                // Si la ruta actual es exactamente igual a una de las rutas sin argumentos
-                if (currentRoute == routePattern) {
-                    true
+    var startDestination by remember { mutableStateOf(NavDestinations.LOADING_ROUTE) }
+    var isLoadingInitialRoute by remember { mutableStateOf(true) }
+
+    LaunchedEffect(userAuthState) {
+        when (val state = userAuthState) {
+            is UserAuthState.Authenticated -> {
+                // ASUME que tu modelo User tiene un campo 'dietGoal'
+                // Si tu modelo User se llama diferente o el campo es diferente, ajusta 'state.user.dietGoal'
+                startDestination =
+                    if (state.user.dietGoal == null) {
+                        NavDestinations.DIET_FORM_ROUTE
+                    } else {
+                        NavDestinations.HOME_ROUTE
+                    }
+                isLoadingInitialRoute = false
+            }
+            is UserAuthState.Unauthenticated -> {
+                // Decide qué hacer si no está autenticado. Podría ser DIET_FORM_ROUTE
+                // o una pantalla de inicio de sesión si la tuvieras.
+                startDestination = NavDestinations.DIET_FORM_ROUTE // Ejemplo
+                isLoadingInitialRoute = false
+            }
+            UserAuthState.Loading -> {
+                isLoadingInitialRoute = true // Permanece en carga
+            }
+        }
+    }
+
+    if (isLoadingInitialRoute) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+    } else {
+        // Lógica de BottomBar (la mantengo como la tenías)
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentRoute = navBackStackEntry?.destination?.route
+        val routesWithoutBottomBar =
+            setOf(
+                NavDestinations.DIET_FORM_ROUTE,
+                NavDestinations.PREPARATION_ROUTE_WITH_ARG,
+            )
+        val showBottomBar =
+            currentRoute != null &&
+                !routesWithoutBottomBar.any { routePattern ->
+                    if (currentRoute == routePattern) {
+                        true
+                    } else if (routePattern.contains("{") && routePattern.contains("}")) {
+                        val regexPattern = routePattern.replace(Regex("\\{.*?\\}"), "[^/]+")
+                        currentRoute.matches(Regex(regexPattern))
+                    } else {
+                        false
+                    }
                 }
-                // Si el patrón de ruta contiene un placeholder de argumento
-                else if (routePattern.contains("{") && routePattern.contains("}")) {
-                    // Crea una expresión regular para que coincida con el patrón de ruta
-                    // Ej: "preparation/{recipeId}" se convierte en "preparation/[^/]+"
-                    val regexPattern = routePattern.replace(Regex("\\{.*?\\}"), "[^/]+")
-                    currentRoute.matches(Regex(regexPattern))
+
+        Scaffold(
+            bottomBar = {
+                if (showBottomBar) {
+                    BottomBar(controller = navController)
                 }
-                // Si no hay coincidencia
-                else {
-                    false
-                }
-            }
-
-    Scaffold(
-        bottomBar = {
-            if (showBottomBar) { // Usa la variable corregida
-                BottomBar(controller = controller)
-            }
-        },
-    ) { paddingValue ->
-        NavHost(
-            navController = controller,
-            startDestination = NavDestinations.HOME_ROUTE,
-            modifier = Modifier.padding(paddingValue),
-        ) {
-            composable(NavDestinations.HOME_ROUTE) {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    CodiaMainView()
-                }
-            }
-
-            composable(NavDestinations.DIET_FORM_ROUTE) {
-                DietFormScreen(navController = controller)
-            }
-
-            composable(
-                route = NavDestinations.USER_PROGRESS_ROUTE_WITH_ARG,
-                arguments = listOf(navArgument("id") { type = NavType.IntType }),
-            ) { navBackStackEntry ->
-                val userId = navBackStackEntry.arguments?.getInt("id")
-                Log.d("MainActivity_UserProgress", "Received User ID in NavHost: $userId")
-                if (userId != null) {
-                    UserProgressScreen(navController = controller)
-                } else {
-                    Text("Error: ID de usuario no encontrado para Progreso.")
-                }
-            }
-
-            composable(NavDestinations.RECIPE_LIST_ROUTE) {
-                RecipeScreen(navController = controller)
-            }
-
-            composable(
-                route = NavDestinations.PREPARATION_ROUTE_WITH_ARG,
-                arguments = listOf(navArgument(NavDestinations.RECIPE_ARGUMENT) { type = NavType.IntType }),
+            },
+        ) { paddingValue ->
+            NavHost(
+                navController = navController,
+                startDestination = startDestination, // <--- USA LA RUTA INICIAL DETERMINADA DINÁMICAMENTE
+                modifier = Modifier.padding(paddingValue),
             ) {
-                PreparationScreen(navController = controller)
-            }
+                // Ruta de carga (puede ser simple si el NavHost solo se muestra después de cargar)
+                composable(NavDestinations.LOADING_ROUTE) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator() // O un Composable de pantalla de carga más elaborado
+                    }
+                }
 
-            composable(NavDestinations.HISTORY_ROUTE) {
-                HistoryScreen(navController = controller)
-            }
+                composable(NavDestinations.HOME_ROUTE) {
+                    // CodiaMainView es tu pantalla de inicio según tu código original
+                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                        CodiaMainView(/* navController si lo necesita */)
+                    }
+                }
 
-            composable(NavDestinations.USER_PROFILE_ROUTE) {
-                UserScreen(navController = controller)
+                composable(NavDestinations.DIET_FORM_ROUTE) {
+                    DietFormScreen(
+                        navController = navController,
+                        // Añade un callback para manejar la navegación después de guardar
+                        onSaveSuccess = {
+                            navController.navigate(NavDestinations.HOME_ROUTE) {
+                                popUpTo(NavDestinations.DIET_FORM_ROUTE) { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        },
+                    )
+                }
+
+                composable(
+                    route = NavDestinations.USER_PROGRESS_ROUTE_WITH_ARG,
+                    arguments = listOf(navArgument("id") { type = NavType.IntType }),
+                ) { navBackStackEntry ->
+                    // ... (tu lógica existente)
+                    // val userId = navBackStackEntry.arguments?.getInt("id")
+                    UserProgressScreen(navController = navController)
+                }
+
+                composable(NavDestinations.RECIPE_LIST_ROUTE) {
+                    RecipeScreen(navController = navController)
+                }
+
+                composable(
+                    route = NavDestinations.PREPARATION_ROUTE_WITH_ARG,
+                    arguments = listOf(navArgument(NavDestinations.RECIPE_ARGUMENT) { type = NavType.IntType }),
+                ) {
+                    PreparationScreen(navController = navController)
+                }
+
+                composable(NavDestinations.HISTORY_ROUTE) {
+                    HistoryScreen(navController = navController)
+                }
+
+                composable(NavDestinations.USER_PROFILE_ROUTE) {
+                    UserScreen(navController = navController)
+                }
+                // Añade el resto de tus rutas aquí
             }
         }
     }

@@ -1,4 +1,4 @@
-package ar.edu.unlam.mobile.scaffolding.ui.screens.user
+package ar.edu.unlam.mobile.scaffolding.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

@@ -1,5 +1,6 @@
 package ar.edu.unlam.mobile.scaffolding.data.repositories
 
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.NutritionalValue
 import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.Recipe
 import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.RecipeHistoryItem
 import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.RecipeListItem
@@ -13,6 +14,8 @@ interface RecipesRepository {
     fun getRecipeListItems(): Flow<List<RecipeListItem>>
 
     suspend fun getRecipeListItemsByIds(ids: List<Int>): List<RecipeHistoryItem>
+
+    suspend fun getNutritionalValueByRecipeId(recipeId: Int): NutritionalValue
 
     // suspend fun addRecipe(recipe: Recipe, ingredients: List<Ingredient>, )
 

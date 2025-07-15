@@ -4,6 +4,7 @@ import android.util.Log
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.dao.RecipeDao
 import ar.edu.unlam.mobile.scaffolding.data.datasources.local.entities.RecipeEntity
 import ar.edu.unlam.mobile.scaffolding.domain.model.ingredients.UsedIngredient
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.NutritionalValue
 import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.Recipe
 import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.RecipeHistoryItem
 import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.RecipeListItem
@@ -22,8 +23,7 @@ class RecipesRepositoryImpl
             Log.d("RecipesRepo", "getRecipeListItems llamado")
             return recipeDao.getRecipeListItems().map { listQueryResults ->
                 Log.d("RecipesRepo", "Entities desde DAO: ${listQueryResults.size}")
-                listQueryResults.map { dbItem ->
-                    // Mapea RecipeListItemQueryResult a tu RecipeListItem del dominio
+                listQueryResults.map { dbItem -> // Mapea RecipeListItemQueryResult a tu RecipeListItem del dominio
                     RecipeListItem(
                         id = dbItem.id,
                         name = dbItem.name,
@@ -56,6 +56,11 @@ class RecipesRepositoryImpl
                     isFavorite = result.isFavorite,
                 )
             }
+        }
+
+        override suspend fun getNutritionalValueByRecipeId(recipeId: Int): NutritionalValue {
+            val nutritionalValue = recipeDao.getNutritionalValueForRecipe(recipeId)
+            return nutritionalValue
         }
 
         override fun getRecipeDetails(recipeId: Int): Flow<Recipe?> {
@@ -99,7 +104,6 @@ class RecipesRepositoryImpl
                             nutritionalValue = it.recipe.nutritionalValue,
                             rating = it.recipe.rating,
                             isFavorite = it.recipe.isFavorite,
-                            // Asigna la lista de ingredientes de dominio mapeados
                             usedIngredients = domainUsedIngredients,
                         )
                     }

@@ -15,4 +15,6 @@ data class User(
     val dietGoal: DietGoal? = null,
     val selectedDietaryRestrictions: List<String>? = null,
     val recipeHistory: List<CompletedRecipeInfo> = emptyList(),
+    val points: Int = 0,
+    val level: Int = 1,
 )
