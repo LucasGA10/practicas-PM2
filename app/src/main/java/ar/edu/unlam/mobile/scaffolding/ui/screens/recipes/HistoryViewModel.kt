@@ -44,7 +44,7 @@ class HistoryViewModel
         val completedRecipes: StateFlow<List<RecipeHistoryItem>> = // Cambiado de RecipeHistoryItem a RecipeListItem
             currentUser.transformLatest { user ->
                 if (user == null) {
-                    _error.value = "Usuario no encontrado. O no agregaste recetas al historial.(testeo)"
+                    _error.value = "Aún no has completado ninguna receta."
                     _isLoading.value = false
                     emit(emptyList()) // Emitir el tipo correcto
                     return@transformLatest

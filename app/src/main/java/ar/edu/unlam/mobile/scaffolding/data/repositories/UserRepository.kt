@@ -6,15 +6,15 @@ import ar.edu.unlam.mobile.scaffolding.domain.model.user.User
 import kotlinx.coroutines.flow.Flow
 
 interface UserRepository {
-    suspend fun newUser(newUser: User)
+    suspend fun loginUser(email: String, password: String): Result<User>
 
-    fun getCurrentUser(): Flow<User>
+    suspend fun createUser(newUser: User): Result<Unit>
 
-    fun updateUser(user: User): String
+    fun getCurrentUser(): Flow<User?>
 
     suspend fun getUserById(id: Int): User?
 
-    suspend fun saveUser(user: User)
+    fun editUser(user: User): Result<Unit>
 
     suspend fun updateUserDietProfile(
         userId: Int,
