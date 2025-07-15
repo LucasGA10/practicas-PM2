@@ -12,11 +12,10 @@ import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 sealed interface UserAuthState {
-    data object Loading : UserAuthState
-
-    data class Authenticated(val user: User) : UserAuthState
-
-    data object Unauthenticated : UserAuthState
+    object Loading : UserAuthState // Estado inicial mientras se carga el usuario
+    object Unauthenticated : UserAuthState // Nadie ha iniciado sesión
+    data class AuthenticatedWithoutDiet(val user: User) : UserAuthState // Logueado, pero sin datos de dieta
+    data class AuthenticatedWithDiet(val user: User) : UserAuthState // Logueado y con datos de dieta
 }
 
 @HiltViewModel
@@ -25,19 +24,21 @@ class AuthViewModel
     constructor(
         private val userRepository: UserRepository,
     ) : ViewModel() {
-        // Este flow determina el estado de autenticación y si el dietGoal está presente
-        val userAuthState: StateFlow<UserAuthState> =
-            userRepository.getCurrentUser()
-                .map { user ->
-                    if (user != null) {
-                        UserAuthState.Authenticated(user)
-                    } else {
-                        UserAuthState.Unauthenticated // O podrías tener otra lógica si un usuario "existe" pero está incompleto
-                    }
+    val userAuthState: StateFlow<UserAuthState> = userRepository.getCurrentUser()
+        .map { user ->
+            if (user == null) {
+                UserAuthState.Unauthenticated
+            } else {
+                if (user.dietGoal == null) { // Ajusta esta condición según tu modelo
+                    UserAuthState.AuthenticatedWithoutDiet(user)
+                } else {
+                    UserAuthState.AuthenticatedWithDiet(user)
                 }
-                .stateIn(
-                    scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(5000),
-                    initialValue = UserAuthState.Loading,
-                )
-    }
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = UserAuthState.Loading // Correcto: estado inicial es Loading
+        )
+}

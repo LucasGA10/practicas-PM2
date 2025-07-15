@@ -35,6 +35,8 @@ import androidx.navigation.navArgument
 import ar.edu.unlam.mobile.scaffolding.ui.components.BottomBar
 import ar.edu.unlam.mobile.scaffolding.ui.screens.AuthViewModel
 import ar.edu.unlam.mobile.scaffolding.ui.screens.DietFormScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.LoginScreen
+import ar.edu.unlam.mobile.scaffolding.ui.screens.SingupScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.UserAuthState
 import ar.edu.unlam.mobile.scaffolding.ui.screens.recipes.HistoryScreen
 import ar.edu.unlam.mobile.scaffolding.ui.screens.recipes.PreparationScreen
@@ -67,6 +69,8 @@ class MainActivity : ComponentActivity() {
 }
 
 object NavDestinations {
+    const val LOGIN_ROUTE = "login"
+    const val CREATE_ACCOUNT_ROUTE = "SingupScreen"
     const val LOADING_ROUTE = "loading"
     const val DIET_FORM_ROUTE = "dietForm"
     const val HOME_ROUTE = "home"
@@ -85,35 +89,16 @@ fun MainScreen(
 ) {
     val userAuthState by authViewModel.userAuthState.collectAsStateWithLifecycle()
 
-    var startDestination by remember { mutableStateOf(NavDestinations.LOADING_ROUTE) }
-    var isLoadingInitialRoute by remember { mutableStateOf(true) }
-
-    LaunchedEffect(userAuthState) {
-        when (val state = userAuthState) {
-            is UserAuthState.Authenticated -> {
-                // ASUME que tu modelo User tiene un campo 'dietGoal'
-                // Si tu modelo User se llama diferente o el campo es diferente, ajusta 'state.user.dietGoal'
-                startDestination =
-                    if (state.user.dietGoal == null) {
-                        NavDestinations.DIET_FORM_ROUTE
-                    } else {
-                        NavDestinations.HOME_ROUTE
-                    }
-                isLoadingInitialRoute = false
-            }
-            is UserAuthState.Unauthenticated -> {
-                // Decide qué hacer si no está autenticado. Podría ser DIET_FORM_ROUTE
-                // o una pantalla de inicio de sesión si la tuvieras.
-                startDestination = NavDestinations.DIET_FORM_ROUTE // Ejemplo
-                isLoadingInitialRoute = false
-            }
-            UserAuthState.Loading -> {
-                isLoadingInitialRoute = true // Permanece en carga
-            }
+    val startDestination = remember(userAuthState) { // Se recalcula si userAuthState cambia
+        when (userAuthState) {
+            is UserAuthState.Unauthenticated -> NavDestinations.LOGIN_ROUTE
+            is UserAuthState.AuthenticatedWithoutDiet -> NavDestinations.DIET_FORM_ROUTE
+            is UserAuthState.AuthenticatedWithDiet -> NavDestinations.HOME_ROUTE
+            UserAuthState.Loading -> null // Aún no está listo
         }
     }
 
-    if (isLoadingInitialRoute) {
+    if (startDestination == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
@@ -123,8 +108,10 @@ fun MainScreen(
         val currentRoute = navBackStackEntry?.destination?.route
         val routesWithoutBottomBar =
             setOf(
+                NavDestinations.LOGIN_ROUTE,
+                NavDestinations.CREATE_ACCOUNT_ROUTE,
                 NavDestinations.DIET_FORM_ROUTE,
-                NavDestinations.PREPARATION_ROUTE_WITH_ARG,
+                NavDestinations.PREPARATION_ROUTE_WITH_ARG
             )
         val showBottomBar =
             currentRoute != null &&
@@ -148,18 +135,25 @@ fun MainScreen(
         ) { paddingValue ->
             NavHost(
                 navController = navController,
-                startDestination = startDestination, // <--- USA LA RUTA INICIAL DETERMINADA DINÁMICAMENTE
+                startDestination = startDestination,
                 modifier = Modifier.padding(paddingValue),
             ) {
                 // Ruta de carga (puede ser simple si el NavHost solo se muestra después de cargar)
                 composable(NavDestinations.LOADING_ROUTE) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator() // O un Composable de pantalla de carga más elaborado
+                        CircularProgressIndicator()
                     }
                 }
 
+                composable(NavDestinations.LOGIN_ROUTE) {
+                    LoginScreen(navController = navController)
+                }
+
+                composable(NavDestinations.CREATE_ACCOUNT_ROUTE) {
+                    SingupScreen(navController = navController)
+                }
+
                 composable(NavDestinations.HOME_ROUTE) {
-                    // CodiaMainView es tu pantalla de inicio según tu código original
                     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                         CodiaMainView(/* navController si lo necesita */)
                     }
@@ -168,7 +162,6 @@ fun MainScreen(
                 composable(NavDestinations.DIET_FORM_ROUTE) {
                     DietFormScreen(
                         navController = navController,
-                        // Añade un callback para manejar la navegación después de guardar
                         onSaveSuccess = {
                             navController.navigate(NavDestinations.HOME_ROUTE) {
                                 popUpTo(NavDestinations.DIET_FORM_ROUTE) { inclusive = true }
@@ -182,8 +175,6 @@ fun MainScreen(
                     route = NavDestinations.USER_PROGRESS_ROUTE_WITH_ARG,
                     arguments = listOf(navArgument("id") { type = NavType.IntType }),
                 ) { navBackStackEntry ->
-                    // ... (tu lógica existente)
-                    // val userId = navBackStackEntry.arguments?.getInt("id")
                     UserProgressScreen(navController = navController)
                 }
 

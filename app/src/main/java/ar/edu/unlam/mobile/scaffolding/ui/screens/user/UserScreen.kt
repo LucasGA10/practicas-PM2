@@ -1,5 +1,6 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens.user
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -144,8 +145,8 @@ fun UserProfileHeader(
                 modifier =
                     Modifier
                         .align(Alignment.TopEnd)
-                        .padding(4.dp),
-                // .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+                        .padding(4.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), CircleShape)
             ) {
                 Icon(
                     imageVector = Icons.Filled.Edit,
