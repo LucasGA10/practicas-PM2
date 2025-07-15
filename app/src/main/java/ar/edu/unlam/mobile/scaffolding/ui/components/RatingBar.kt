@@ -16,15 +16,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.ar.unlam.ddi.ui.theme.PrimaryGreen
+import ar.edu.unlam.mobile.scaffolding.ui.theme.gold
 
 @Composable
 fun RatingBar(
     modifier: Modifier = Modifier,
     rating: Float,
     maxRating: Int = 5,
-    starsColor: Color = Color.Yellow,
-    emptyStarColor: Color = PrimaryGreen,
+    starsColor: Color = gold,
+    emptyStarColor: Color = Color.Gray,
     starSize: Dp = 20.dp, // Añadido para consistencia
 ) {
     Row(modifier = modifier) {
@@ -52,12 +52,12 @@ fun ClickableRatingBar(
     currentRating: Float,
     onRatingChanged: (Float) -> Unit,
     starSize: Dp = 24.dp, // Tamaño de las estrellas
-    starColor: Color = Color.Yellow,
+    starColor: Color = gold,
     emptyStarColor: Color = MaterialTheme.colorScheme.outline,
 ) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.Center, // Centra las estrellas
+        horizontalArrangement = Arrangement.Center,
     ) {
         for (i in 1..maxRating) {
             val isSelected = currentRating >= i
@@ -68,8 +68,8 @@ fun ClickableRatingBar(
                 modifier =
                     Modifier
                         .size(starSize)
-                        .clickable { onRatingChanged(i.toFloat()) } // Actualiza al valor de la estrella clickeada
-                        .padding(horizontal = 2.dp), // Pequeño espacio entre estrellas
+                        .clickable { onRatingChanged(i.toFloat()) }
+                        .padding(horizontal = 2.dp),
             )
         }
     }

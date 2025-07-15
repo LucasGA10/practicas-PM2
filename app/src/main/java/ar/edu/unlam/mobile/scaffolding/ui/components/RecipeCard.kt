@@ -28,12 +28,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ar.edu.unlam.mobile.scaffolding.data.model.recipes.Category
-import ar.edu.unlam.mobile.scaffolding.data.model.recipes.Difficulty
-import ar.edu.unlam.mobile.scaffolding.data.model.recipes.RecipeListItem
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.Category
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.Difficulty
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.RecipeListItem
 import coil.compose.AsyncImage
-import com.ar.unlam.ddi.ui.theme.PrimaryGreen
-import com.ar.unlam.ddi.ui.theme.PrimaryGreenDark
 
 @Composable
 fun RecipeCard(
@@ -99,7 +97,7 @@ fun RecipeCard(
                         Icon(
                             imageVector = if (recipe.isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                             contentDescription = if (recipe.isFavorite) "Quitar de favoritos" else "Añadir a favoritos",
-                            tint = if (recipe.isFavorite) PrimaryGreenDark else PrimaryGreen,
+                            tint = if (recipe.isFavorite) Color.Red else Color.Gray,
                             modifier = Modifier.size(22.dp),
                         )
                     }

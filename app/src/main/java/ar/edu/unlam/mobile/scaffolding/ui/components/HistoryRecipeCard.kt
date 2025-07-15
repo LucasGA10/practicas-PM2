@@ -1,13 +1,15 @@
 package ar.edu.unlam.mobile.scaffolding.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -24,19 +26,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ar.edu.unlam.mobile.scaffolding.data.model.recipes.Category
-import ar.edu.unlam.mobile.scaffolding.data.model.recipes.Difficulty
-import ar.edu.unlam.mobile.scaffolding.data.model.recipes.RecipeListItem
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.Category
+import ar.edu.unlam.mobile.scaffolding.domain.model.recipes.RecipeHistoryItem
 import coil.compose.AsyncImage
-import com.ar.unlam.ddi.ui.theme.PrimaryGreen
-import com.ar.unlam.ddi.ui.theme.PrimaryGreenDark
 
 @Composable
 fun HistoryRecipeCard(
-    recipe: RecipeListItem,
+    recipe: RecipeHistoryItem,
     modifier: Modifier = Modifier,
     onClickAction: () -> Unit = {},
     onFavoriteClick: () -> Unit = {},
@@ -54,82 +55,86 @@ fun HistoryRecipeCard(
                 .padding(vertical = 5.dp),
         onClick = { onClickAction() },
     ) {
-        Row(modifier = Modifier.padding(3.dp)) {
+        Row(
+            modifier =
+                Modifier
+                    .padding(3.dp)
+                    .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             AsyncImage(
                 model = recipe.imageUrl,
-                contentDescription = null,
+                contentDescription = recipe.name,
                 modifier =
                     Modifier
                         .size(75.dp)
                         .clip(RoundedCornerShape(5.dp))
                         .background(MaterialTheme.colorScheme.secondary),
                 contentScale = ContentScale.Crop,
+                onError = {
+                    // Opcional: mostrar un placeholder o icono si la imagen falla
+                },
             )
-            Spacer(modifier = Modifier.size(5.dp))
+
+            Spacer(modifier = Modifier.width(12.dp))
 
             Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = recipe.name,
+                    style =
+                        MaterialTheme.typography.titleMedium.copy(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                        ),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "Categoría: ${recipe.category}",
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+
+                // Mostrar la fecha de completitud
+                Text(
+                    text = "Completada: ${recipe.completionDate}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+
+                // Opcional: Mostrar porciones o tags si hay espacio y es relevante
+                // Row {
+                //     Text("Porciones: ${recipe.portions}", style = MaterialTheme.typography.bodySmall)
+                //     Spacer(modifier = Modifier.width(8.dp))
+                //     if (recipe.tags.isNotEmpty()) {
+                //         Text("Tags: ${recipe.tags.take(2).joinToString()}", style = MaterialTheme.typography.bodySmall)
+                //     }
+                // }
+            }
+            Spacer(modifier = Modifier.width(8.dp)) // Espacio antes del botón de favorito
+
+            IconButton(
+                onClick = { onFavoriteClick() },
                 modifier =
                     Modifier
-                        .padding(start = 5.dp)
-                        .weight(1f),
+                        .size(24.dp)
+                        .align(Alignment.CenterVertically),
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = recipe.name,
-                        style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp),
-                        modifier =
-                            Modifier
-                                .weight(1f)
-                                .size(24.dp),
-                    )
-
-                    IconButton(
-                        onClick = { onFavoriteClick() },
-                        modifier =
-                            Modifier
-                                .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp)
-                                .size(24.dp)
-                                .align(Alignment.CenterVertically),
-                    ) {
-                        Icon(
-                            imageVector = if (recipe.isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                            contentDescription = if (recipe.isFavorite) "Quitar de favoritos" else "Añadir a favoritos",
-                            tint = if (recipe.isFavorite) PrimaryGreenDark else PrimaryGreen,
-                            modifier = Modifier.size(22.dp),
-                        )
-                    }
-                }
-
-                /*Column(modifier = Modifier.padding(top = 5.dp)) {
-                    Text(
-                        text = "Kcal: ${recipe.nutritionalValue} kcal",
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Start
-                    )
-                    Text(
-                        text = "Proteína: ${recipe.protein} g",
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Start
-                    )
-                    Text(
-                        text = "Carbohidratos: ${recipe.carbs} g",
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Start
-                    )
-                    Text(
-                        text = "Grasas: ${recipe.fats} g",
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Start
-                    )
-                    Text(
-                        text = "${recipe.date}",
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Start
-                    )
-                }*/
+                Icon(
+                    imageVector = if (recipe.isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                    contentDescription = if (recipe.isFavorite) "Quitar de favoritos" else "Añadir a favoritos",
+                    tint = if (recipe.isFavorite) Color.Red else Color.Gray,
+                    modifier = Modifier.size(22.dp),
+                )
             }
         }
     }
@@ -140,15 +145,15 @@ fun HistoryRecipeCard(
 fun HistoryRecipeCardPreview() {
     HistoryRecipeCard(
         recipe =
-            RecipeListItem(
+            RecipeHistoryItem(
                 id = 1,
                 name = "Avena Proteica con Frutas",
                 imageUrl = "https://example.com/avena.jpg",
                 category = Category.Desayuno,
-                difficulty = Difficulty.Fácil,
                 portions = 2,
                 tags = listOf(Category.Vegano, Category.Proteico, Category.Desayuno),
                 isFavorite = true,
+                completionDate = "23/05/2024 10:30:15",
             ),
     )
 }

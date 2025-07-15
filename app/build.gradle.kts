@@ -10,11 +10,11 @@ plugins {
 
 android {
     namespace = "ar.edu.unlam.mobile.scaffolding"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "ar.edu.unlam.mobile.scaffolding"
-        minSdk = 24
+        minSdk = 33
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -66,6 +66,7 @@ dependencies {
     // Base
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
@@ -79,6 +80,10 @@ dependencies {
     implementation(libs.google.gson)
     implementation(libs.engage.core)
     implementation(libs.androidx.paging.common.android)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.constraintlayout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
