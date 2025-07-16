@@ -1,5 +1,6 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ar.edu.unlam.mobile.scaffolding.data.repositories.UserRepository

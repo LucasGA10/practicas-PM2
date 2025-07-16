@@ -58,12 +58,12 @@ import coil.compose.AsyncImage
 @Composable
 fun DietFormScreen(
     viewModel: DietFormViewModel = hiltViewModel(),
-    onSaveSuccess: () -> Unit = {}, // Callback para cuando se guarda exitosamente
+    onSaveSuccess: () -> Unit = {},
     navController: NavHostController,
 ) {
     val uiState = viewModel.uiState
 
-    val onNavigateBack: (() -> Unit)? = { navController.popBackStack() }
+    val back: (() -> Unit)? = { navController.popBackStack() }
 
     // Si el guardado fue exitoso, llama al callback y resetea el flag
     LaunchedEffect(uiState.saveSuccess) {
@@ -90,7 +90,7 @@ fun DietFormScreen(
         topBar = {
             TopBar(
                 title = "Formulario Dietapp",
-                onNavigateBack = onNavigateBack,
+                onNavigateBack = back,
                 colors =
                     TopAppBarDefaults.centerAlignedTopAppBarColors(
                         containerColor = MaterialTheme.colorScheme.background.copy(alpha = 0.9f),

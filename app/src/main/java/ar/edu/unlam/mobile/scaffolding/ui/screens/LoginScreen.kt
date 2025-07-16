@@ -99,9 +99,6 @@ fun LoginScreen(
                     if (currentUser!!.dietGoal == null) {
                         NavDestinations.DIET_FORM_ROUTE
                     } else {
-                        // Si tienes una pantalla de perfil de usuario y quieres ir allí
-                        // después del formulario de dieta (o si el formulario ya está completo), úsala.
-                        // Si no, HOME_ROUTE es el destino general después de la dieta.
                         NavDestinations.HOME_ROUTE // O NavDestinations.USER_PROFILE_ROUTE si es el destino final post-dieta
                     }
                 navController.navigate(destination) {
