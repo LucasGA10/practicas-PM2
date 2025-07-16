@@ -1,5 +1,6 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens.user
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,7 +58,22 @@ fun UserScreen(
     viewModel: UserViewModel = hiltViewModel(),
 ) {
     val currentUser by viewModel.currentUser.collectAsStateWithLifecycle()
+    val logoutEvent by viewModel.logoutState.collectAsStateWithLifecycle() // Observa el estado de logout
     val scrollState = rememberScrollState()
+
+    LaunchedEffect(logoutEvent) {
+        if (logoutEvent == UserViewModel.LogoutEvent.NavigateToLogin) {
+            Log.d("UserScreen", "Recibido LogoutEvent.NavigateToLogin, navegando...")
+            navController.navigate("login") {
+                popUpTo(navController.graph.startDestinationId) {
+                    inclusive = true // También elimina la pantalla de inicio (homeScreenRoute) de la pila
+                }
+                // Asegúrate de que la pantalla de login sea la única instancia en la pila
+                launchSingleTop = true
+            }
+            viewModel.onLogoutEventConsumed() // Resetea el evento para evitar re-navegaciones
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (currentUser == null) {
@@ -98,7 +115,10 @@ fun UserScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
                 Button(
-                    onClick = { navController.navigate("login") },
+                    onClick = {
+                        Log.d("UserScreen", "Botón Cerrar Sesión clickeado, llamando a viewModel.logoutUser()")
+                        viewModel.logoutUser()
+                              },
                     modifier =
                         Modifier
                             .fillMaxWidth()
@@ -155,7 +175,10 @@ fun UserProfileHeader(
                     Modifier
                         .align(Alignment.TopEnd)
                         .padding(4.dp)
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), CircleShape),
+                        .background(
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            CircleShape
+                        ),
             ) {
                 Icon(
                     imageVector = Icons.Filled.Edit,
