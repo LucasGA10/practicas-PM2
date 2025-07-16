@@ -1,6 +1,7 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens.recipes
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,6 +36,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -47,6 +49,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -59,6 +62,7 @@ import ar.edu.unlam.mobile.scaffolding.ui.components.NutritionalInfoCard
 import ar.edu.unlam.mobile.scaffolding.ui.components.RatingBar
 import ar.edu.unlam.mobile.scaffolding.ui.components.TopBar
 import coil.compose.AsyncImage
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,15 +72,30 @@ fun PreparationScreen(
 ) {
     val recipe by viewModel.recipe.collectAsState()
     val uiUsedIngredients: List<UiUsedIngredient> by viewModel.uiUsedIngredients.collectAsState()
-
     var ingredientsVisible by remember { mutableStateOf(true) }
-
     val back: (() -> Unit)? = { navController.popBackStack() }
 
     val showRatingDialog = viewModel.showRatingDialog.collectAsState().value
     val currentDialogRating = viewModel.currentRatingForDialog.collectAsState().value
     var userSelectedRating by remember(recipe?.rating) {
         mutableFloatStateOf(recipe?.rating ?: 0f)
+    }
+
+    val context = LocalContext.current
+
+    LaunchedEffect(key1 = Unit) { // O key1 = viewModel si prefieres re-lanzar si el VM cambia
+        viewModel.toastMessage.collectLatest { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // Observar errores del ViewModel (si ya lo tienes o quieres añadirlo)
+    val errorMesage by viewModel.error.collectAsState()
+    LaunchedEffect(errorMesage) {
+        errorMesage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            viewModel.clearError() // Asumiendo que tienes una función para limpiar el error
+        }
     }
 
     Scaffold(

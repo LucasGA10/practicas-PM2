@@ -13,9 +13,11 @@ import ar.edu.unlam.mobile.scaffolding.domain.usecases.ToggleFavoriteRecipeUseCa
 import ar.edu.unlam.mobile.scaffolding.domain.usecases.UpdateRecipeRatingUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -53,9 +55,11 @@ class PreparationViewModel
         private val _currentRatingForDialog = MutableStateFlow(0f) // Rating temporal para el diálogo
         val currentRatingForDialog: StateFlow<Float> = _currentRatingForDialog.asStateFlow()
 
+        private val _toastMessage = MutableSharedFlow<String>() // Para eventos de Toast
+        val toastMessage = _toastMessage.asSharedFlow()
+
         private val currentUserId: StateFlow<User?> =
             userRepository.getCurrentUser().stateIn(viewModelScope, SharingStarted.Eagerly, null)
-
         private val _error = MutableStateFlow<String?>(null)
         val error: StateFlow<String?> = _error.asStateFlow()
 
@@ -190,19 +194,35 @@ class PreparationViewModel
         fun onRatingSubmitted(rating: Float) {
             _showRatingDialog.value = false
             val recipeValue = recipe.value
-            val userId = currentUserId.value?.id
+            val userId = currentUserId.value?.id // Asegúrate de que currentUserId se esté recolectando correctamente
 
             if (recipeValue != null && userId != null) {
                 viewModelScope.launch {
-                    // 1. Actualizar el rating "general" de la receta (si es diferente de la puntuación del historial)
-                    updateRecipeRatingUseCase(recipeValue.id, rating)
+                    // 1. Actualizar el rating "general" de la receta
+                    updateRecipeRatingUseCase(recipeValue.id, rating) // Ya lo tienes
 
                     // 2. Añadir al historial del usuario
-                    val result = userRepository.addRecipeToHistory(userId, recipeValue.id)
-                    result.fold(
+                    val historyResult = userRepository.addRecipeToHistory(userId, recipeValue.id) // Ya lo tienes
+                    historyResult.fold(
                         onSuccess = {
                             Log.d("PrepViewModel", "Receta ${recipeValue.id} añadida al historial con rating $rating")
-                            // Opcional: Mostrar un mensaje de éxito
+
+                            // 3. AÑADIR PUNTOS AL USUARIO TRAS COMPLETAR Y GUARDAR EN HISTORIAL
+                            val pointsToAdd = 100 // Puntos a añadir
+                            val addPointsResult = userRepository.addPointsToUser(pointsToAdd) // Reutiliza el método del repo
+                            addPointsResult.fold(
+                                onSuccess = {
+                                    _toastMessage.emit("¡Receta completada y +$pointsToAdd puntos!")
+
+                                    Log.d("PrepViewModel", "$pointsToAdd puntos añadidos al usuario $userId.")
+                                    // Opcional: Mostrar un mensaje de éxito combinado
+                                    // _successMessage.value = "¡Receta guardada y +$pointsToAdd puntos ganados!"
+                                },
+                                onFailure = { pointsError ->
+                                    _error.value = "Receta guardada, pero error al añadir puntos: ${pointsError.message}"
+                                    Log.e("PrepViewModel", "Error al añadir puntos al usuario $userId", pointsError)
+                                },
+                            )
                         },
                         onFailure = { e ->
                             _error.value = "Error al guardar en historial: ${e.message}"
@@ -212,10 +232,16 @@ class PreparationViewModel
                 }
             } else {
                 _error.value = "No se pudo guardar: receta o usuario no disponibles."
+                if (recipeValue == null) Log.e("PrepViewModel", "onRatingSubmitted: recipe.value es null")
+                if (userId == null) Log.e("PrepViewModel", "onRatingSubmitted: currentUserId.value?.id es null")
             }
         }
 
         fun onDialogRatingChanged(newRating: Float) {
             _currentRatingForDialog.value = newRating.coerceIn(0f, 5f)
+        }
+
+        fun clearError() {
+            _error.value = null
         }
     }

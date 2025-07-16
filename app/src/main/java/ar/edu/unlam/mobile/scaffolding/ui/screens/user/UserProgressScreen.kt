@@ -63,7 +63,6 @@ import ar.edu.unlam.mobile.scaffolding.ui.components.UserInfoHeader
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.github.tehras.charts.bar.BarChart
-import com.github.tehras.charts.bar.renderer.label.SimpleValueDrawer
 import com.github.tehras.charts.bar.renderer.xaxis.SimpleXAxisDrawer
 import com.github.tehras.charts.bar.renderer.yaxis.SimpleYAxisDrawer
 import kotlin.math.roundToInt
@@ -215,20 +214,17 @@ fun UserProgressScreen(
                                     Modifier
                                         .fillMaxWidth()
                                         .height(200.dp),
+                                // Altura del área del gráfico
                                 xAxisDrawer =
-                                    SimpleXAxisDrawer(
+                                    SimpleXAxisDrawer( // Para las etiquetas de los DÍAS en el eje X
                                         axisLineColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        // labelTextColor = MaterialTheme.colorScheme.onSurfaceVariant, // Opcional
                                     ),
                                 yAxisDrawer =
-                                    SimpleYAxisDrawer(
+                                    SimpleYAxisDrawer( // El eje Y seguirá mostrando sus etiquetas de escala
                                         axisLineColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                         labelTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                         labelValueFormatter = { value -> "${value.toInt()}" },
-                                    ),
-                                labelDrawer =
-                                    SimpleValueDrawer(
-                                        drawLocation = SimpleValueDrawer.DrawLocation.Inside,
-                                        labelTextColor = MaterialTheme.colorScheme.onPrimary,
                                     ),
                             )
                         } else {
@@ -311,7 +307,7 @@ fun UserProgressScreen(
 fun NutritionalSummaryCard(
     totalNutrition: NutritionalValue,
     title: String = "Resumen Nutricional Acumulado",
-    onAddClick: (() -> Unit)? = null, // Parámetro opcional para la acción del botón
+    onAddClick: (() -> Unit)? = null,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),

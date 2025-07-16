@@ -337,7 +337,7 @@ class UserProgressViewModel
                 val chartBars = mutableListOf<Bar>()
 
                 val historyDateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
-                val dayOfWeekFormatter = DateTimeFormatter.ofPattern("EEE", Locale.getDefault())
+                val dayOfWeekFormatter = DateTimeFormatter.ofPattern("EEE", Locale("es", "ES")) // <--- CAMBIO AQUÍ
 
                 val dailyCaloriesMap = mutableMapOf<LocalDate, Float>()
                 for (i in (daysToShow - 1) downTo 0) {
@@ -425,7 +425,11 @@ class UserProgressViewModel
                     val emptyBars =
                         (0 until daysToShow).map { i ->
                             val dateValue = today.minusDays((daysToShow - 1 - i).toLong())
-                            Bar(label = dateValue.format(dayOfWeekFormatter), value = 0f, color = Color.Gray)
+                            Bar(
+                                label = dateValue.format(dayOfWeekFormatter),
+                                value = 0f,
+                                color = Color.Gray,
+                            )
                         }
                     _weeklyCaloriesChartData.value = BarChartData(bars = emptyBars)
                 }
