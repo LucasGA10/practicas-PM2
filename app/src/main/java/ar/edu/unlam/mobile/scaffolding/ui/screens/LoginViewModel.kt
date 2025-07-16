@@ -38,10 +38,6 @@ class LoginViewModel
             passwordValue: String,
         ) {
             viewModelScope.launch {
-                // Actualizar estados internos si los tienes aquí
-                // email = emailValue
-                // password = passwordValue
-
                 _isLoading.value = true
                 _loginResult.value = null // Limpiar resultado anterior
 

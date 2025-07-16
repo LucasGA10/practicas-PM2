@@ -73,11 +73,19 @@ fun LoginScreen(
         loginResult?.let { result ->
             if (result.isSuccess) {
                 val user = result.getOrNull()
-                Toast.makeText(context, "Login exitoso: ¡Bienvenido ${user?.userName ?: ""}!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    "Login exitoso: ¡Bienvenido ${user?.userName ?: ""}!",
+                    Toast.LENGTH_SHORT
+                ).show()
                 // La navegación se manejará al observar currentUser
             } else {
                 val exception = result.exceptionOrNull()
-                Toast.makeText(context, "Error de login: ${exception?.message ?: "Error desconocido"}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    context,
+                    "Error de login: ${exception?.message ?: "Error desconocido"}",
+                    Toast.LENGTH_LONG
+                ).show()
             }
             viewModel.clearLoginResult() // Limpia el resultado para no volver a mostrar el Toast en recomposiciones
         }
@@ -98,7 +106,8 @@ fun LoginScreen(
                     }
                 navController.navigate(destination) {
                     popUpTo(NavDestinations.LOGIN_ROUTE) { inclusive = true }
-                    launchSingleTop = true // Importante para evitar múltiples instancias del destino
+                    launchSingleTop =
+                        true // Importante para evitar múltiples instancias del destino
                 }
             }
         }
@@ -126,7 +135,7 @@ fun LoginScreen(
             )
 
             Text(
-                text = "Ingresa con tu usuario",
+                text = "Ingresa con tu Email",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(top = 24.dp, bottom = 12.dp),
             )
@@ -134,7 +143,7 @@ fun LoginScreen(
             OutlinedTextField(
                 value = emailInput,
                 onValueChange = { emailInput = it },
-                label = { Text("email@domain.com") },
+                label = { Text("Email") },
                 modifier =
                     Modifier
                         .fillMaxWidth()
@@ -142,7 +151,8 @@ fun LoginScreen(
                         .padding(top = 12.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 singleLine = true,
-                isError = loginResult?.isFailure ?: false, // Marcar como error si el último login falló
+                isError = loginResult?.isFailure
+                    ?: false, // Marcar como error si el último login falló
             )
 
             OutlinedTextField(
@@ -189,60 +199,77 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Botón de Google
-            Button(
-                onClick = {
-                    Toast.makeText(context, "Login con Google (TODO)", Toast.LENGTH_SHORT).show()
-                },
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .padding(top = 30.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = Color.Black,
-                    ),
-                enabled = !isLoading,
+            // --- Botones de Login Social ---
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.googlelogo),
-                    contentDescription = "Logo de Google",
-                    modifier = Modifier.size(24.dp),
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Continue with Google", fontSize = 16.sp)
-            }
+                // Botón de Google
+                Button(
+                    onClick = {
+                        Toast.makeText(context, "Login con Google (TODO)", Toast.LENGTH_SHORT)
+                            .show()
+                    },
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(52.dp) // Altura unificada
+                            // .padding(top = 30.dp) // El padding se manejará por el Spacer y el Column
+                            .padding(bottom = 8.dp), // Espacio entre Google y Apple
+                    shape = RoundedCornerShape(8.dp),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = Color.White,
+                            contentColor = Color.Black,
+                        ),
+                    enabled = !isLoading,
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.googlelogo),
+                        contentDescription = "Logo de Google",
+                        modifier = Modifier.size(24.dp),
+                        tint = Color.Unspecified
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Continue with Google", fontSize = 16.sp)
+                }
 
-            // Botón de Apple
-            Button(
-                onClick = {
-                    Toast.makeText(context, "Login con Apple (TODO)", Toast.LENGTH_SHORT).show()
-                },
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .padding(top = 16.dp, bottom = 16.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = Color.Black,
-                    ),
-                enabled = !isLoading,
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.applelogo),
-                    contentDescription = "Logo de Apple",
-                    modifier = Modifier.size(24.dp),
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Continue with Apple", fontSize = 16.sp)
+                // Botón de Apple
+                Button(
+                    onClick = {
+                        Toast.makeText(context, "Login con Apple (TODO)", Toast.LENGTH_SHORT).show()
+                    },
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(52.dp) // Altura unificada
+                            .padding(top = 8.dp), // Espacio entre Google y Apple
+                    // .padding(top = 16.dp, bottom = 16.dp), // Ajustado
+                    shape = RoundedCornerShape(8.dp),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = Color.White,
+                            contentColor = Color.Black,
+                        ),
+                    enabled = !isLoading,
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.applelogo),
+                        contentDescription = "Logo de Apple",
+                        modifier = Modifier.size(24.dp),
+                        tint = Color.Unspecified
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Continue with Apple", fontSize = 16.sp)
+                }
             }
+            // --- Fin Botones de Login Social ---
+
+            // Spacer opcional en la parte inferior para dar un poco de aire
+            Spacer(modifier = Modifier.height(24.dp)) // Ajusta esta altura según necesites
         }
+
+
     }
 }
 

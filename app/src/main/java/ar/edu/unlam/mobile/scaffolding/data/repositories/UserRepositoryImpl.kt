@@ -98,6 +98,15 @@ class UserRepositoryImpl
                     level = 6,
                 ),
             )
+            users.add(
+                User(
+                    id = 2,
+                    userName = "Juanty",
+                    email = "tuMail@outlook.com",
+                    password = "23456",
+                    imageUrl = "https://tse1.mm.bing.net/th/id/OIP.KH0U9aqDcET1l2n-ltLxzgHaHa?w=626&h=626&rs=1&pid=ImgDetMain&o=7&rm=3",
+                )
+            )
         }
 
         override suspend fun loginUser(
