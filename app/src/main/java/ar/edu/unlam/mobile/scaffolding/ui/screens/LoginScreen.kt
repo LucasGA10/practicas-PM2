@@ -104,25 +104,24 @@ fun LoginScreen(
         }
     }
 
-    Surface(modifier = Modifier.fillMaxSize()) { // Equivalente al fondo de la pantalla
+    Surface(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .verticalScroll(scrollState) // Para pantallas pequeñas o mucho contenido
+                    .verticalScroll(scrollState)
                     .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top, // O Arrangement.SpaceEvenly si quieres distribuir
+            verticalArrangement = Arrangement.Top,
         ) {
             Image(
-                painter = painterResource(id = R.drawable.logoverde), // Reemplaza con tu recurso real
+                painter = painterResource(id = R.drawable.logoverde),
                 contentDescription = "Logo de la aplicación",
                 modifier =
                     Modifier
-                        .width(150.dp)
-                        .height(100.dp)
+                        .width(250.dp)
+                        .height(200.dp)
                         .padding(top = 16.dp),
-                // Ajusta según el espaciado deseado arriba
                 contentScale = ContentScale.Fit,
             )
 
