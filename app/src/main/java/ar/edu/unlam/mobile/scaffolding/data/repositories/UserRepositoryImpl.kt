@@ -24,6 +24,10 @@ class UserRepositoryImpl
     ) : UserRepository {
         private val users = mutableListOf<User>()
         private val _currentUserFlow = MutableStateFlow<User?>(null)
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
+        val now = System.currentTimeMillis()
+        val dayInMillis = 86400000L // Milisegundos en un día
+        val hourInMillis = 3600000L // Milisegundos en una hora
 
         init {
             users.add(
@@ -38,10 +42,60 @@ class UserRepositoryImpl
                     heightCm = 170f,
                     gender = Gender.MALE,
                     dietGoal = DietGoal.LOSE_WEIGHT,
-                    desiredCalories = 200.0,
-                    recipeHistory = emptyList(),
-                    points = 0,
-                    level = 1,
+                    desiredCalories = 1000.0,
+                    recipeHistory =
+                        listOf(
+                            CompletedRecipeInfo(
+                                recipeId = 1,
+                                completionDate = dateFormat.format(Date(now - hourInMillis * 2)),
+                            ), // Hace 2 horas
+                            CompletedRecipeInfo(
+                                recipeId = 3,
+                                completionDate = dateFormat.format(Date(now - hourInMillis * 5)),
+                            ), // Hace 5 horas
+                            CompletedRecipeInfo(
+                                recipeId = 1,
+                                completionDate = dateFormat.format(Date(now - dayInMillis * 1)),
+                            ),
+                            CompletedRecipeInfo(
+                                recipeId = 4,
+                                completionDate = dateFormat.format(Date(now - dayInMillis * 1 - hourInMillis * 3)),
+                            ), // Ayer, hace unas horas más
+                            CompletedRecipeInfo(
+                                recipeId = 2,
+                                completionDate = dateFormat.format(Date(now - dayInMillis * 2)),
+                            ),
+                            CompletedRecipeInfo(
+                                recipeId = 5,
+                                completionDate = dateFormat.format(Date(now - dayInMillis * 2 - hourInMillis * 6)),
+                            ),
+                            CompletedRecipeInfo(
+                                recipeId = 10,
+                                completionDate = dateFormat.format(Date(now - dayInMillis * 3)),
+                            ),
+                            CompletedRecipeInfo(
+                                recipeId = 6,
+                                completionDate = dateFormat.format(Date(now - dayInMillis * 4)),
+                            ),
+                            CompletedRecipeInfo(
+                                recipeId = 2,
+                                completionDate = dateFormat.format(Date(now - dayInMillis * 4 - hourInMillis * 4)),
+                            ),
+                            CompletedRecipeInfo(
+                                recipeId = 13,
+                                completionDate = dateFormat.format(Date(now - dayInMillis * 5)),
+                            ),
+                            CompletedRecipeInfo(
+                                recipeId = 7,
+                                completionDate = dateFormat.format(Date(now - dayInMillis * 6)),
+                            ),
+                            CompletedRecipeInfo(
+                                recipeId = 1,
+                                completionDate = dateFormat.format(Date(now - dayInMillis * 6 - hourInMillis * 5)),
+                            ),
+                        ),
+                    points = 360,
+                    level = 4,
                 ),
             )
         }
@@ -129,12 +183,12 @@ class UserRepositoryImpl
             return Result.failure(Exception("Error al actualizar el usuario, no encontrado."))
         }
 
-    override suspend fun clearCurrentUserSession() {
-        _currentUserFlow.value = null
-        Log.d("UserRepository", "Sesión del usuario limpiada.")
-    }
+        override suspend fun clearCurrentUserSession() {
+            _currentUserFlow.value = null
+            Log.d("UserRepository", "Sesión del usuario limpiada.")
+        }
 
-    override suspend fun addRecipeToHistory(
+        override suspend fun addRecipeToHistory(
             userId: Int,
             recipeId: Int,
         ): Result<Unit> {

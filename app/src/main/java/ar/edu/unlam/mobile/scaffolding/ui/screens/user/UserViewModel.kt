@@ -15,22 +15,20 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
-
 @HiltViewModel
 class UserViewModel
     @Inject
     constructor(
         private val userRepository: UserRepository,
     ) : ViewModel() {
+        private val _logoutState = MutableStateFlow<LogoutEvent?>(null)
+        val logoutState = _logoutState.asStateFlow()
 
-    private val _logoutState = MutableStateFlow<LogoutEvent?>(null)
-    val logoutState = _logoutState.asStateFlow()
+        sealed class LogoutEvent {
+            object NavigateToLogin : LogoutEvent()
+        }
 
-    sealed class LogoutEvent {
-        object NavigateToLogin : LogoutEvent()
-    }
-    val currentUser: StateFlow<User?> =
+        val currentUser: StateFlow<User?> =
             userRepository.getCurrentUser() // Debe ser Flow<User?>
                 .stateIn(
                     scope = viewModelScope,
@@ -38,19 +36,16 @@ class UserViewModel
                     initialValue = null, // O un valor inicial apropiado
                 )
 
-    fun logoutUser() {
-        viewModelScope.launch {
-            userRepository.clearCurrentUserSession()
+        fun logoutUser() {
+            viewModelScope.launch {
+                userRepository.clearCurrentUserSession()
 
-            _logoutState.value = LogoutEvent.NavigateToLogin
-            Log.d("UserViewModel", "Usuario ha cerrado sesión, evento NavigateToLogin emitido.")
+                _logoutState.value = LogoutEvent.NavigateToLogin
+                Log.d("UserViewModel", "Usuario ha cerrado sesión, evento NavigateToLogin emitido.")
+            }
+        }
+
+        fun onLogoutEventConsumed() {
+            _logoutState.value = null
         }
     }
-
-    fun onLogoutEventConsumed() {
-        _logoutState.value = null
-    }
-
-    }
-
-

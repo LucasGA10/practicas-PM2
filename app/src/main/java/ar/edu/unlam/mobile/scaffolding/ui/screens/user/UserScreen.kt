@@ -1,6 +1,7 @@
 package ar.edu.unlam.mobile.scaffolding.ui.screens.user
 
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +28,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,6 +43,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -52,6 +55,7 @@ import ar.edu.unlam.mobile.scaffolding.domain.model.user.User
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserScreen(
     navController: NavHostController,
@@ -75,58 +79,58 @@ fun UserScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        if (currentUser == null) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        } else {
-            val user = currentUser!!
+    if (currentUser == null) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) { // Mantén un Box para centrar el indicador de carga
+            CircularProgressIndicator()
+        }
+    } else {
+        val user = currentUser!!
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(bottom = 70.dp), // Espacio para el FAB si se superpone con contenido al final
+        ) {
+            UserProfileHeader(
+                user = user,
+                onEditClick = {
+                    println("Edit profile clicked for ${user.userName}")
+                },
+            )
 
-            Column(
+            // Sección de detalles del usuario
+            UserDetailsCard(user = user)
+
+            Spacer(modifier = Modifier.height(24.dp)) // Un poco más de espacio antes de los botones de acción
+
+            // Botón para ir a DietFormScreen
+            Button(
+                onClick = { navController.navigate("dietForm") },
                 modifier =
                     Modifier
-                        .fillMaxSize()
-                        .verticalScroll(scrollState)
-                        .padding(bottom = 70.dp), // Espacio para el FAB si se superpone con contenido al final
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
             ) {
-                UserProfileHeader(
-                    user = user,
-                    onEditClick = {
-                        // TODO: Navegar a la pantalla de edición de perfil
-                        // navController.navigate("edit_profile_route")
-                        println("Edit profile clicked for ${user.userName}")
-                    },
-                )
+                Text("Actualizar Preferencias de Dieta") // O el texto que prefieras
+            }
 
-                // Sección de detalles del usuario
-                UserDetailsCard(user = user)
-
-                Spacer(modifier = Modifier.height(24.dp)) // Un poco más de espacio antes de los botones de acción
-
-                // Botón para ir a DietFormScreen
-                Button(
-                    onClick = { navController.navigate("dietForm") },
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                ) {
-                    Text("Actualizar Preferencias de Dieta") // O el texto que prefieras
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-                Button(
-                    onClick = {
-                        Log.d("UserScreen", "Botón Cerrar Sesión clickeado, llamando a viewModel.logoutUser()")
-                        viewModel.logoutUser()
-                              },
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                    // colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                ) {
-                    Text("Cerrar Sesión")
-                }
+            Spacer(modifier = Modifier.height(12.dp))
+            Button(
+                onClick = {
+                    Log.d("UserScreen", "Botón Cerrar Sesión clickeado, llamando a viewModel.logoutUser()")
+                    viewModel.logoutUser()
+                },
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                // colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+            ) {
+                Text("Cerrar Sesión")
             }
         }
     }
@@ -135,56 +139,68 @@ fun UserScreen(
 @Composable
 fun UserProfileHeader(
     user: User,
-    onEditClick: () -> Unit, // Callback para el botón de editar
+    onEditClick: () -> Unit,
 ) {
     Box(
         modifier =
             Modifier
-                .fillMaxWidth()
-                .padding(top = 32.dp, bottom = 16.dp),
-        contentAlignment = Alignment.TopCenter,
+                .fillMaxWidth(),
+        // .height(200.dp) // Define una altura para el header o usa aspectRatio para el fondo
+        // El padding superior se puede quitar si el fondo verde ya crea el espacio deseado
+        // .padding(top = 32.dp, bottom = 16.dp),
     ) {
-        Box(
+        // Imagen de fondo
+        Image(
+            painter = painterResource(id = R.drawable.fondoverde),
+            contentDescription = "Fondo de perfil",
             modifier =
                 Modifier
-                    .size(136.dp),
-        ) {
-            // Imagen de Perfil
-            AsyncImage(
-                model =
-                    ImageRequest.Builder(LocalContext.current)
-                        .data(user.imageUrl ?: R.drawable.ic_no_profile_image_round)
-                        .crossfade(true)
-                        .error(R.drawable.ic_no_profile_image_round)
-                        .placeholder(R.drawable.ic_no_profile_image_round)
-                        .build(),
-                contentDescription = "Foto de perfil de ${user.userName}",
-                modifier =
-                    Modifier
-                        .size(120.dp)
-                        .clip(CircleShape)
-                        .align(Alignment.Center),
-                // Centra la imagen dentro de esta Box interna
-                contentScale = ContentScale.Crop,
-            )
+                    .fillMaxWidth()
+                    .height(170.dp),
+            contentScale = ContentScale.Crop,
+        )
 
-            // Botón de Editar (Lápiz)
-            IconButton(
-                onClick = onEditClick,
-                modifier =
-                    Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(4.dp)
-                        .background(
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            CircleShape
-                        ),
+        // Contenido superpuesto (imagen de perfil y botón de editar)
+        Column( // Usamos una Columna para centrar el contenido verticalmente si es necesario, o para apilar más cosas
+            modifier =
+                Modifier
+                    .align(Alignment.Center)
+                    .padding(top = 32.dp, bottom = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Box( // Contenedor para la imagen de perfil y el botón de editar
+                modifier = Modifier.size(136.dp), // Tamaño del contenedor de la imagen de perfil y el botón
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Edit,
-                    contentDescription = "Editar perfil",
-                    tint = MaterialTheme.colorScheme.primary,
+                AsyncImage(
+                    model =
+                        ImageRequest.Builder(LocalContext.current)
+                            .data(user.imageUrl ?: R.drawable.ic_no_profile_image_round)
+                            .crossfade(true)
+                            .error(R.drawable.ic_no_profile_image_round)
+                            .placeholder(R.drawable.ic_no_profile_image_round)
+                            .build(),
+                    contentDescription = "Foto de perfil de ${user.userName}",
+                    modifier =
+                        Modifier
+                            .size(120.dp)
+                            .clip(CircleShape)
+                            .align(Alignment.Center),
+                    contentScale = ContentScale.Crop,
                 )
+                IconButton(
+                    onClick = onEditClick,
+                    modifier =
+                        Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(4.dp)
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f), CircleShape),
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = "Editar perfil",
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
             }
         }
     }

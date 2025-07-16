@@ -98,6 +98,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation("com.google.accompanist:accompanist-pager:0.30.1")
     implementation(files("libs/homescreen.aar"))
+    implementation(libs.charts)
 
     // Dagger + Hilt
     implementation(libs.google.dagger.hilt.android)

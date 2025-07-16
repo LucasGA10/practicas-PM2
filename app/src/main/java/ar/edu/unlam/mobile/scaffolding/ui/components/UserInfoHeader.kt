@@ -1,5 +1,7 @@
 package ar.edu.unlam.mobile.scaffolding.ui.components
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,13 +23,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import ar.edu.unlam.mobile.scaffolding.R
 import ar.edu.unlam.mobile.scaffolding.domain.model.user.DietGoal
 import ar.edu.unlam.mobile.scaffolding.domain.model.user.User
 import ar.edu.unlam.mobile.scaffolding.ui.theme.gold
-import coil.compose.AsyncImage
 
 @Composable
 fun UserInfoHeader(user: User) {
@@ -38,16 +41,23 @@ fun UserInfoHeader(user: User) {
                 .height(200.dp),
     ) {
         // Imagen de Fondo
-        AsyncImage(
-            model = "https://wallpapers.com/images/featured-full/imagenes-de-comida-saludable-km9yurcpjzjofsf4.jpg", // ¡REEMPLAZA con tu imagen!
+        Image(
+            painter = painterResource(R.drawable.alimentos_verdes),
             contentDescription = "Encabezado de perfil de usuario",
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .blur(radius = 24.dp),
+                    .background(MaterialTheme.colorScheme.primary)
+                    .blur(radius = 20.dp),
             contentScale = ContentScale.Crop,
         )
-
+        // Color negro con 35% de opacidad
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.35f)),
+        )
         // Contenido sobre la imagen
         Column(
             modifier =
