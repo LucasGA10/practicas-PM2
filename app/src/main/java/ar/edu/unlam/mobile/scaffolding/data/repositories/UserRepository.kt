@@ -19,6 +19,8 @@ interface UserRepository {
 
     fun editUser(user: User): Result<Unit>
 
+    suspend fun clearCurrentUserSession()
+
     suspend fun updateUserDietProfile(
         userId: Int,
         weightKg: Float,

@@ -33,6 +33,15 @@ class UserRepositoryImpl
                     email = "miMail@outlook.com",
                     password = "12345",
                     imageUrl = "https://img.freepik.com/premium-vector/funny-mango-character_844724-2012.jpg",
+                    age = 23,
+                    weightKg = 70f,
+                    heightCm = 170f,
+                    gender = Gender.MALE,
+                    dietGoal = DietGoal.LOSE_WEIGHT,
+                    desiredCalories = 200.0,
+                    recipeHistory = emptyList(),
+                    points = 0,
+                    level = 1,
                 ),
             )
         }
@@ -120,7 +129,12 @@ class UserRepositoryImpl
             return Result.failure(Exception("Error al actualizar el usuario, no encontrado."))
         }
 
-        override suspend fun addRecipeToHistory(
+    override suspend fun clearCurrentUserSession() {
+        _currentUserFlow.value = null
+        Log.d("UserRepository", "Sesión del usuario limpiada.")
+    }
+
+    override suspend fun addRecipeToHistory(
             userId: Int,
             recipeId: Int,
         ): Result<Unit> {
