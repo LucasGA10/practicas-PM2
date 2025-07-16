@@ -13,6 +13,7 @@ data class User(
     val heightCm: Float? = null,
     val gender: Gender? = null,
     val dietGoal: DietGoal? = null,
+    val desiredCalories: Double? = null,
     val selectedDietaryRestrictions: List<String>? = null,
     val recipeHistory: List<CompletedRecipeInfo> = emptyList(),
     val points: Int = 0,

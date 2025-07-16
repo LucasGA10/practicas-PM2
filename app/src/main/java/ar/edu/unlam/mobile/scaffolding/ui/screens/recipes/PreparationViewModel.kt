@@ -179,7 +179,7 @@ class PreparationViewModel
         }
 
         fun onRecipeCompletedClicked() {
-            // _currentRatingForDialog.value = 0f
+            _currentRatingForDialog.value = 0f
             _showRatingDialog.value = true
         }
 

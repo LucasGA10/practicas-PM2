@@ -13,7 +13,9 @@ interface RecipesRepository {
 
     fun getRecipeListItems(): Flow<List<RecipeListItem>>
 
-    suspend fun getRecipeListItemsByIds(ids: List<Int>): List<RecipeHistoryItem>
+    fun getRecipeListItemById(recipeId: Int): Flow<RecipeListItem?>
+
+    suspend fun getRecipeHistoryItemsByIds(ids: List<Int>): List<RecipeHistoryItem>
 
     suspend fun getNutritionalValueByRecipeId(recipeId: Int): NutritionalValue
 

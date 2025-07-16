@@ -92,7 +92,12 @@ fun HistoryScreen(
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        items(completedRecipes, key = { it.id }) { recipe ->
+                        items(
+                            items = completedRecipes,
+                            // Clave única combinando el ID de la receta y su fecha de finalización.
+                            // La fecha de finalización ya es un String, lo que la hace útil para esto.
+                            key = { recipe -> "${recipe.id}-${recipe.completionDate}" },
+                        ) { recipe ->
                             HistoryRecipeCard(
                                 recipe = recipe,
                                 onFavoriteClick = { viewModel.toggleFavorite(recipe.id) },

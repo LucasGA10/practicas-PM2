@@ -9,7 +9,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -26,40 +25,41 @@ class UserRepositoryImpl
         private val users = mutableListOf<User>()
         private val _currentUserFlow = MutableStateFlow<User?>(null)
 
-
-        init{
+        init {
             users.add(
                 User(
                     id = 1,
                     userName = "Lucas",
-                    email = "miEmail@email.com",
+                    email = "miMail@outlook.com",
                     password = "12345",
                     imageUrl = "https://img.freepik.com/premium-vector/funny-mango-character_844724-2012.jpg",
-                )
+                ),
             )
         }
 
+        override suspend fun loginUser(
+            email: String,
+            password: String,
+        ): Result<User> {
+            return withContext(ioDispatcher) {
+                Log.d("UserRepositoryImpl", "Intentando login para email: $email")
+                val foundUser = users.find { it.email.equals(email, ignoreCase = true) }
 
-    override suspend fun loginUser(email: String, password: String): Result<User> {
-        return withContext(ioDispatcher) {
-            Log.d("UserRepositoryImpl", "Intentando login para email: $email")
-            val foundUser = users.find { it.email.equals(email, ignoreCase = true) }
-
-            if (foundUser != null) {
-                if (foundUser.password == password) {
-                    _currentUserFlow.value = foundUser
-                    Log.d("UserRepositoryImpl", "Login exitoso para: ${foundUser.userName}")
-                    Result.success(foundUser)
+                if (foundUser != null) {
+                    if (foundUser.password == password) {
+                        _currentUserFlow.value = foundUser
+                        Log.d("UserRepositoryImpl", "Login exitoso para: ${foundUser.userName}")
+                        Result.success(foundUser)
+                    } else {
+                        Log.w("UserRepositoryImpl", "Contraseña incorrecta para email: $email")
+                        Result.failure(Exception("Contraseña incorrecta."))
+                    }
                 } else {
-                    Log.w("UserRepositoryImpl", "Contraseña incorrecta para email: $email")
-                    Result.failure(Exception("Contraseña incorrecta."))
+                    Log.w("UserRepositoryImpl", "Usuario no encontrado con email: $email")
+                    Result.failure(Exception("Usuario no encontrado."))
                 }
-            } else {
-                Log.w("UserRepositoryImpl", "Usuario no encontrado con email: $email")
-                Result.failure(Exception("Usuario no encontrado."))
             }
         }
-    }
 
         override suspend fun createUser(newUser: User): Result<Unit> {
             users.add(
@@ -68,10 +68,9 @@ class UserRepositoryImpl
             return Result.success(Unit)
         }
 
-    override fun getCurrentUser(): Flow<User?> = _currentUserFlow.asStateFlow()
+        override fun getCurrentUser(): Flow<User?> = _currentUserFlow.asStateFlow()
 
-
-    override suspend fun getUserById(id: Int): User? {
+        override suspend fun getUserById(id: Int): User? {
             return users.find { it.id == id }
         }
 
@@ -83,6 +82,7 @@ class UserRepositoryImpl
             gender: Gender,
             dietGoal: DietGoal,
             selectedRestrictions: List<String>,
+            desiredCalories: Double,
         ): Result<Unit> {
             return withContext(ioDispatcher) {
                 // delay(1000) // Simular latencia
@@ -97,6 +97,7 @@ class UserRepositoryImpl
                             gender = gender,
                             dietGoal = dietGoal,
                             selectedDietaryRestrictions = selectedRestrictions,
+                            desiredCalories = desiredCalories,
                         )
                     _currentUserFlow.value = updatedUser
                     Log.d("UserRepositoryImpl", "User profile updated with restrictions: $selectedRestrictions")
@@ -108,16 +109,15 @@ class UserRepositoryImpl
         }
 
         override fun editUser(user: User): Result<Unit> {
-            var message = ""
-            try {
-                if (users.find { it.id == user.id } != null) {
-                    users[user.id] = user
-                    message = "Usuario actualizado"
-                }
-            } catch (e: Exception) {
-                message = "Error al actualizar el usuario"
+            val index = users.indexOfFirst { it.id == user.id }
+            if (index != -1) {
+                users[index] = user
+                _currentUserFlow.value = user
+                Log.d("UserRepositoryImpl", "Usuario actualizado: $user")
+                return Result.success(Unit)
             }
-            return Result.success(Unit)
+            Log.w("UserRepositoryImpl", "Error al actualizar, usuario no encontrado con ID: ${user.id}")
+            return Result.failure(Exception("Error al actualizar el usuario, no encontrado."))
         }
 
         override suspend fun addRecipeToHistory(
@@ -127,33 +127,29 @@ class UserRepositoryImpl
             return withContext(ioDispatcher) {
                 val currentUser = _currentUserFlow.value
 
-                if (currentUser!!.id != userId) {
-                    Log.e("UserRepositoryImpl", "Intento de añadir al historial para un ID de usuario incorrecto: $userId")
-                    return@withContext Result.failure(Exception("ID de usuario incorrecto."))
+                if (currentUser == null || currentUser.id != userId) {
+                    Log.e(
+                        "UserRepositoryImpl",
+                        "Intento de añadir al historial para un usuario incorrecto o no logueado. UserID: $userId, CurrentUser: ${currentUser?.id}",
+                    )
+                    return@withContext Result.failure(Exception("Usuario incorrecto o no logueado."))
                 }
 
-                val existingEntryIndex = currentUser.recipeHistory.indexOfFirst { it.recipeId == recipeId }
                 val updatedHistory = currentUser.recipeHistory.toMutableList()
 
-                // Formatear la fecha actual como String
-                val currentDate = Date() // Obtiene la fecha y hora actual
-                val dateFormat =
-                    SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()) // Define el formato
-                val formattedDateString = dateFormat.format(currentDate) // Formatea a String
+                val currentDate = Date()
+                val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
+                val formattedDateString = dateFormat.format(currentDate)
 
                 val newEntry = CompletedRecipeInfo(recipeId = recipeId, completionDate = formattedDateString)
 
-                if (existingEntryIndex != -1) {
-                    updatedHistory[existingEntryIndex] = newEntry
-                } else {
-                    updatedHistory.add(newEntry)
-                }
+                updatedHistory.add(newEntry)
 
                 _currentUserFlow.value = currentUser.copy(recipeHistory = updatedHistory)
 
                 Log.d(
                     "UserRepositoryImpl",
-                    "Receta $recipeId añadida/actualizada en historial del usuario ${currentUser.id} con fecha '${newEntry.completionDate}'. Nuevo historial: $updatedHistory",
+                    "Receta $recipeId AÑADIDA (permitiendo duplicados) al historial del usuario ${currentUser.id} con fecha '${newEntry.completionDate}'. Nuevo historial: $updatedHistory",
                 )
                 Result.success(Unit)
             }

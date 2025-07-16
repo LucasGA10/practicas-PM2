@@ -16,7 +16,6 @@ class UserViewModel
     constructor(
         private val userRepository: UserRepository,
     ) : ViewModel() {
-
         val currentUser: StateFlow<User?> =
             userRepository.getCurrentUser() // Debe ser Flow<User?>
                 .stateIn(

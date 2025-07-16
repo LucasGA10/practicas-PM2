@@ -63,9 +63,7 @@ fun DietFormScreen(
 ) {
     val uiState = viewModel.uiState
 
-    val onNavigateBack: (() -> Unit)? = {
-        navController.popBackStack()
-    }
+    val onNavigateBack: (() -> Unit)? = { navController.popBackStack() }
 
     // Si el guardado fue exitoso, llama al callback y resetea el flag
     LaunchedEffect(uiState.saveSuccess) {
@@ -92,7 +90,7 @@ fun DietFormScreen(
         topBar = {
             TopBar(
                 title = "Formulario Dietapp",
-                onNavigateBack = onNavigateBack, // Pasa la acción de retroceso
+                onNavigateBack = onNavigateBack,
                 colors =
                     TopAppBarDefaults.centerAlignedTopAppBarColors(
                         containerColor = MaterialTheme.colorScheme.background.copy(alpha = 0.9f),
@@ -204,7 +202,23 @@ fun DietFormScreen(
                         modifier = Modifier.fillMaxWidth(), // Ocupa el ancho completo
                     )
                 }
-                item { Spacer(modifier = Modifier.height(24.dp)) } // Más espacio antes de la caja de restricciones
+                if (uiState.showDesiredCaloriesField) {
+                    item { Spacer(modifier = Modifier.height(16.dp)) }
+                    item {
+                        OutlinedTextField(
+                            value = uiState.desiredCalories,
+                            onValueChange = { viewModel.onEvent(DietFormEvent.DesiredCaloriesChanged(it)) },
+                            label = { Text("${uiState.desiredCaloriesLabel} (por dia)") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            shape = RoundedCornerShape(8.dp),
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                            isError = uiState.desiredCalories.isNotEmpty() && (uiState.desiredCalories.toDoubleOrNull() == null || uiState.desiredCalories.toDouble() <= 0),
+                        )
+                    }
+                }
+
+                item { Spacer(modifier = Modifier.height(24.dp)) }
 
                 // --- Restricciones Dietéticas ---
                 item {
@@ -272,7 +286,7 @@ fun DietFormScreen(
                     Text("Guardar")
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp)) // Espacio abajo
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

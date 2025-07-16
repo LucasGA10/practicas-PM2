@@ -29,6 +29,9 @@ data class DietFormUiState(
     val dietaryRestrictions: List<DietaryRestriction> = allDietaryRestrictions,
     val isDietarySectionVisible: Boolean = false, // Para controlar la expansión
     val isGenderGoalSectionVisible: Boolean = true, // O false si quieres que empiece colapsada
+    val desiredCalories: String = "", // Se guarda como String para el TextField
+    val desiredCaloriesLabel: String = "Calorías Deseadas", // Etiqueta dinámica
+    val showDesiredCaloriesField: Boolean = false, // Para controlar la visibilidad
 )
 
 // Eventos que la UI puede enviar al ViewModel
@@ -42,6 +45,8 @@ sealed class DietFormEvent {
     data class GenderSelected(val gender: Gender) : DietFormEvent()
 
     data class DietGoalSelected(val dietGoal: DietGoal) : DietFormEvent()
+
+    data class DesiredCaloriesChanged(val calories: String) : DietFormEvent() // Nuevo evento
 
     object SaveClicked : DietFormEvent()
 
@@ -62,8 +67,8 @@ class DietFormViewModel
     constructor(
         private val userRepository: UserRepository,
     ) : ViewModel() {
-        var uiState by mutableStateOf(DietFormUiState())
-            private set
+        private val _uiState = mutableStateOf(DietFormUiState())
+        val uiState: DietFormUiState by _uiState
 
         private val currentActiveUserId: Int = 1
 
@@ -73,13 +78,13 @@ class DietFormViewModel
 
         private fun loadExistingData() {
             viewModelScope.launch {
-                uiState =
+                _uiState.value =
                     uiState.copy(isLoading = true) // Opcional: mostrar un loader general para datos iniciales
                 val user = userRepository.getUserById(currentActiveUserId)
                 // Si tuvieras un Flow en userRepository.getCurrentUser() podrías hacer:
                 // val user = userRepository.getCurrentUser().firstOrNull { it?.id == currentActiveUserId }
                 if (user != null) {
-                    uiState =
+                    _uiState.value =
                         uiState.copy(
                             userName = user.userName.ifEmpty { "Usuario" },
                             userImageUrl = user.imageUrl, // Asumiendo que User tiene profileImageUrl
@@ -99,8 +104,7 @@ class DietFormViewModel
                         uiState.dietaryRestrictions.map { option ->
                             option.copy(isSelected = user.selectedDietaryRestrictions?.contains(option.id) == true)
                         }
-
-                    uiState =
+                    _uiState.value =
                         uiState.copy(
                             // ...
                             dietaryRestrictions = updatedRestrictions,
@@ -109,7 +113,7 @@ class DietFormViewModel
                     validateForm() // Revalidar el formulario con los datos cargados
                 } else {
                     // Manejar el caso de que el usuario no se encuentre o no se pueda cargar
-                    uiState =
+                    _uiState.value =
                         uiState.copy(
                             errorMessage = "No se pudieron cargar los datos del usuario.",
                             userName = "Error",
@@ -121,74 +125,87 @@ class DietFormViewModel
         fun onEvent(event: DietFormEvent) {
             when (event) {
                 is DietFormEvent.WeightChanged ->
-                    uiState =
-                        uiState.copy(weight = event.weight, saveSuccess = false)
+                    _uiState.value = uiState.copy(weight = event.weight, saveSuccess = false)
 
                 is DietFormEvent.HeightChanged ->
-                    uiState =
-                        uiState.copy(height = event.height, saveSuccess = false)
+                    _uiState.value = uiState.copy(height = event.height, saveSuccess = false)
 
                 is DietFormEvent.AgeChanged ->
-                    uiState =
-                        uiState.copy(age = event.age, saveSuccess = false)
+                    _uiState.value = uiState.copy(age = event.age, saveSuccess = false)
 
                 is DietFormEvent.GenderSelected ->
-                    uiState =
-                        uiState.copy(selectedGender = event.gender, saveSuccess = false)
+                    _uiState.value = uiState.copy(selectedGender = event.gender, saveSuccess = false)
 
-                is DietFormEvent.DietGoalSelected ->
-                    uiState =
-                        uiState.copy(selectedDietGoal = event.dietGoal, saveSuccess = false)
-
-                is DietFormEvent.SaveClicked -> saveDietInfo()
-                is DietFormEvent.ErrorMessageShown -> uiState = uiState.copy(errorMessage = null)
-                is DietFormEvent.ResetSaveSuccess -> uiState = uiState.copy(saveSuccess = false)
-                is DietFormEvent.ToggleGenderGoalSection -> {
-                    uiState = uiState.copy(isGenderGoalSectionVisible = !uiState.isGenderGoalSectionVisible)
+                is DietFormEvent.DietGoalSelected -> {
+                    val newLabel =
+                        when (event.dietGoal) {
+                            DietGoal.LOSE_WEIGHT -> "Calorías Máximas"
+                            DietGoal.GAIN_WEIGHT -> "Calorías Mínimas"
+                            else -> "Calorías Deseadas"
+                        }
+                    _uiState.value =
+                        uiState.copy(
+                            selectedDietGoal = event.dietGoal,
+                            showDesiredCaloriesField = true, // Mostrar siempre el campo al seleccionar un objetivo
+                            desiredCaloriesLabel = newLabel,
+                            isFormValid = validateForm(),
+                        )
                 }
-                is DietFormEvent.ToggleDietarySection -> {
-                    uiState = uiState.copy(isDietarySectionVisible = !uiState.isDietarySectionVisible)
+                is DietFormEvent.DesiredCaloriesChanged -> {
+                    _uiState.value =
+                        uiState.copy(
+                            desiredCalories = event.calories,
+                            isFormValid = validateForm(),
+                        )
                 }
                 is DietFormEvent.RestrictionToggled -> {
                     val updatedRestrictions =
                         uiState.dietaryRestrictions.map {
-                            if (it.id == event.restrictionId) {
-                                it.copy(isSelected = !it.isSelected)
-                            } else {
-                                it
-                            }
+                            if (it.id == event.restrictionId) it.copy(isSelected = !it.isSelected) else it
                         }
-                    uiState = uiState.copy(dietaryRestrictions = updatedRestrictions, saveSuccess = false)
-                    // No necesitas llamar a validateForm() aquí a menos que la validez dependa de esto.
+                    _uiState.value = uiState.copy(dietaryRestrictions = updatedRestrictions)
+                    // No es necesario revalidar el formulario aquí a menos que las restricciones afecten la validez
                 }
+
+                is DietFormEvent.SaveClicked -> saveDietInfo()
+                is DietFormEvent.ErrorMessageShown -> _uiState.value = uiState.copy(errorMessage = null)
+                is DietFormEvent.ResetSaveSuccess -> _uiState.value = uiState.copy(saveSuccess = false)
+                is DietFormEvent.ToggleGenderGoalSection -> {
+                    _uiState.value = uiState.copy(isGenderGoalSectionVisible = !uiState.isGenderGoalSectionVisible)
+                }
+                is DietFormEvent.ToggleDietarySection -> {
+                    _uiState.value = uiState.copy(isDietarySectionVisible = !uiState.isDietarySectionVisible)
+                }
+                // Otros eventos...
             }
             validateForm()
         }
 
-        private fun validateForm() {
-            val weightValid =
-                uiState.weight.toFloatOrNull()?.let { it > 0 && it < 500 } ?: false // Rangos básicos
-            val heightValid =
-                uiState.height.toFloatOrNull()?.let { it > 50 && it < 300 } ?: false // Rangos básicos
-            val ageValid =
-                uiState.age.toIntOrNull()?.let { it > 0 && it < 150 } ?: false // Rangos básicos
-            val genderValid = uiState.selectedGender != null
-            val dietGoalValid = uiState.selectedDietGoal != null
+        private fun validateForm(): Boolean {
+            val weightValid = uiState.weight.toDoubleOrNull()?.let { it > 0 } ?: false
+            val heightValid = uiState.height.toIntOrNull()?.let { it > 0 } ?: false
+            val ageValid = uiState.age.toIntOrNull()?.let { it > 0 } ?: false
+            val genderSelected = uiState.selectedGender != null
+            val dietGoalSelected = uiState.selectedDietGoal != null
+            // Validación para calorías deseadas si el campo es visible
+            val desiredCaloriesValid =
+                if (uiState.showDesiredCaloriesField) {
+                    uiState.desiredCalories.toDoubleOrNull()?.let { it > 0 } ?: false
+                } else {
+                    true // Si no se muestra, se considera válido para este campo
+                }
 
-            uiState =
-                uiState.copy(
-                    isFormValid = weightValid && heightValid && ageValid && genderValid && dietGoalValid,
-                )
+            return weightValid && heightValid && ageValid && genderSelected && dietGoalSelected && desiredCaloriesValid
         }
 
         private fun saveDietInfo() {
             if (!uiState.isFormValid) {
-                uiState = uiState.copy(errorMessage = "Por favor, completa todos los campos correctamente.")
+                _uiState.value = uiState.copy(errorMessage = "Por favor, completa todos los campos correctamente.")
                 return
             }
 
             viewModelScope.launch {
-                uiState = uiState.copy(isLoading = true, errorMessage = null)
+                _uiState.value = uiState.copy(isLoading = true, errorMessage = null)
                 try {
                     val weightKg = uiState.weight.toFloat()
                     val heightCm = uiState.height.toFloat() // Cambiado a toInt como en tu validación
@@ -199,6 +216,7 @@ class DietFormViewModel
                         uiState.dietaryRestrictions
                             .filter { it.isSelected }
                             .map { it.id }
+                    val desiredCalories = uiState.desiredCalories.toDouble()
 
                     val result =
                         userRepository.updateUserDietProfile(
@@ -209,14 +227,15 @@ class DietFormViewModel
                             gender = gender,
                             dietGoal = dietGoal,
                             selectedRestrictions = selectedRestrictionIds,
+                            desiredCalories = desiredCalories,
                         )
 
                     result.fold(
                         onSuccess = {
-                            uiState = uiState.copy(isLoading = false, saveSuccess = true)
+                            _uiState.value = uiState.copy(isLoading = false, saveSuccess = true)
                         },
                         onFailure = { exception ->
-                            uiState =
+                            _uiState.value =
                                 uiState.copy(
                                     isLoading = false,
                                     errorMessage = "Error al guardar: ${exception.message}",
@@ -224,13 +243,13 @@ class DietFormViewModel
                         },
                     )
                 } catch (e: NumberFormatException) {
-                    uiState =
+                    _uiState.value =
                         uiState.copy(
                             isLoading = false,
                             errorMessage = "Por favor, ingresa números válidos para peso, altura y edad.",
                         )
                 } catch (e: Exception) {
-                    uiState =
+                    _uiState.value =
                         uiState.copy(
                             isLoading = false,
                             errorMessage = "Ocurrió un error inesperado: ${e.message}",

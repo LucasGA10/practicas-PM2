@@ -87,14 +87,15 @@ fun LoginScreen(
     LaunchedEffect(currentUser) {
         if (currentUser != null) {
             if (currentUser != null) {
-                val destination = if (currentUser!!.dietGoal == null) {
-                    NavDestinations.DIET_FORM_ROUTE
-                } else {
-                    // Si tienes una pantalla de perfil de usuario y quieres ir allí
-                    // después del formulario de dieta (o si el formulario ya está completo), úsala.
-                    // Si no, HOME_ROUTE es el destino general después de la dieta.
-                    NavDestinations.HOME_ROUTE // O NavDestinations.USER_PROFILE_ROUTE si es el destino final post-dieta
-                }
+                val destination =
+                    if (currentUser!!.dietGoal == null) {
+                        NavDestinations.DIET_FORM_ROUTE
+                    } else {
+                        // Si tienes una pantalla de perfil de usuario y quieres ir allí
+                        // después del formulario de dieta (o si el formulario ya está completo), úsala.
+                        // Si no, HOME_ROUTE es el destino general después de la dieta.
+                        NavDestinations.HOME_ROUTE // O NavDestinations.USER_PROFILE_ROUTE si es el destino final post-dieta
+                    }
                 navController.navigate(destination) {
                     popUpTo(NavDestinations.LOGIN_ROUTE) { inclusive = true }
                     launchSingleTop = true // Importante para evitar múltiples instancias del destino
@@ -105,55 +106,59 @@ fun LoginScreen(
 
     Surface(modifier = Modifier.fillMaxSize()) { // Equivalente al fondo de la pantalla
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState) // Para pantallas pequeñas o mucho contenido
-                .padding(24.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState) // Para pantallas pequeñas o mucho contenido
+                    .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top // O Arrangement.SpaceEvenly si quieres distribuir
+            verticalArrangement = Arrangement.Top, // O Arrangement.SpaceEvenly si quieres distribuir
         ) {
-
             Image(
                 painter = painterResource(id = R.drawable.logoverde), // Reemplaza con tu recurso real
                 contentDescription = "Logo de la aplicación",
-                modifier = Modifier
-                    .width(150.dp)
-                    .height(100.dp)
-                    .padding(top = 16.dp), // Ajusta según el espaciado deseado arriba
-                contentScale = ContentScale.Fit
+                modifier =
+                    Modifier
+                        .width(150.dp)
+                        .height(100.dp)
+                        .padding(top = 16.dp),
+                // Ajusta según el espaciado deseado arriba
+                contentScale = ContentScale.Fit,
             )
 
             Text(
                 text = "Ingresa con tu usuario",
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(top = 24.dp, bottom = 12.dp)
+                modifier = Modifier.padding(top = 24.dp, bottom = 12.dp),
             )
 
             OutlinedTextField(
                 value = emailInput,
                 onValueChange = { emailInput = it },
                 label = { Text("email@domain.com") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .defaultMinSize(minHeight = 48.dp)
-                    .padding(top = 12.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .defaultMinSize(minHeight = 48.dp)
+                        .padding(top = 12.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 singleLine = true,
-                isError = loginResult?.isFailure ?: false // Marcar como error si el último login falló
+                isError = loginResult?.isFailure ?: false, // Marcar como error si el último login falló
             )
 
             OutlinedTextField(
                 value = passwordInput,
                 onValueChange = { passwordInput = it },
                 label = { Text("password") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .defaultMinSize(minHeight = 48.dp)
-                    .padding(top = 16.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .defaultMinSize(minHeight = 48.dp)
+                        .padding(top = 16.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 visualTransformation = PasswordVisualTransformation(),
                 singleLine = true,
-                isError = loginResult?.isFailure ?: false
+                isError = loginResult?.isFailure ?: false,
             )
 
             if (isLoading) {
@@ -163,10 +168,11 @@ fun LoginScreen(
                     onClick = {
                         viewModel.attemptLogin(emailInput.trim(), passwordInput)
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 24.dp),
-                    enabled = !isLoading // Deshabilitar botón mientras carga
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(top = 24.dp),
+                    enabled = !isLoading, // Deshabilitar botón mientras carga
                 ) {
                     Text("Continuar")
                 }
@@ -174,10 +180,10 @@ fun LoginScreen(
 
             TextButton(
                 onClick = {
-                    navController.navigate("createAccountScreen") // Reemplaza con tu ruta de registro
+                    navController.navigate("SingupScreen") // Reemplaza con tu ruta de registro
                 },
                 modifier = Modifier.padding(top = 24.dp),
-                enabled = !isLoading
+                enabled = !isLoading,
             ) {
                 Text("No tenes cuenta? Registrate ahora")
             }
@@ -189,21 +195,23 @@ fun LoginScreen(
                 onClick = {
                     Toast.makeText(context, "Login con Google (TODO)", Toast.LENGTH_SHORT).show()
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .padding(top = 30.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .padding(top = 30.dp),
                 shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = Color.Black
-                ),
-                enabled = !isLoading
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Color.Black,
+                    ),
+                enabled = !isLoading,
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.googlelogo),
                     contentDescription = "Logo de Google",
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp),
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Continue with Google", fontSize = 16.sp)
@@ -214,21 +222,23 @@ fun LoginScreen(
                 onClick = {
                     Toast.makeText(context, "Login con Apple (TODO)", Toast.LENGTH_SHORT).show()
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .padding(top = 16.dp, bottom = 16.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .padding(top = 16.dp, bottom = 16.dp),
                 shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = Color.Black
-                ),
-                enabled = !isLoading
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Color.Black,
+                    ),
+                enabled = !isLoading,
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.applelogo), // O R.drawable.applelogo
+                    painter = painterResource(id = R.drawable.applelogo),
                     contentDescription = "Logo de Apple",
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp),
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Continue with Apple", fontSize = 16.sp)
@@ -237,7 +247,6 @@ fun LoginScreen(
     }
 }
 
-
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreviewLoginScreenCompose() {
@@ -245,7 +254,7 @@ fun DefaultPreviewLoginScreenCompose() {
     // DietAppV2Theme {
     LoginScreen(
         hiltViewModel(),
-        navController = NavController(LocalContext.current)
+        navController = NavController(LocalContext.current),
     )
     // }
 }

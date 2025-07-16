@@ -15,9 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -89,14 +87,15 @@ fun MainScreen(
 ) {
     val userAuthState by authViewModel.userAuthState.collectAsStateWithLifecycle()
 
-    val startDestination = remember(userAuthState) { // Se recalcula si userAuthState cambia
-        when (userAuthState) {
-            is UserAuthState.Unauthenticated -> NavDestinations.LOGIN_ROUTE
-            is UserAuthState.AuthenticatedWithoutDiet -> NavDestinations.DIET_FORM_ROUTE
-            is UserAuthState.AuthenticatedWithDiet -> NavDestinations.HOME_ROUTE
-            UserAuthState.Loading -> null // Aún no está listo
+    val startDestination =
+        remember(userAuthState) { // Se recalcula si userAuthState cambia
+            when (userAuthState) {
+                is UserAuthState.Unauthenticated -> NavDestinations.LOGIN_ROUTE
+                is UserAuthState.AuthenticatedWithoutDiet -> NavDestinations.DIET_FORM_ROUTE
+                is UserAuthState.AuthenticatedWithDiet -> NavDestinations.HOME_ROUTE
+                UserAuthState.Loading -> null // Aún no está listo
+            }
         }
-    }
 
     if (startDestination == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -111,7 +110,7 @@ fun MainScreen(
                 NavDestinations.LOGIN_ROUTE,
                 NavDestinations.CREATE_ACCOUNT_ROUTE,
                 NavDestinations.DIET_FORM_ROUTE,
-                NavDestinations.PREPARATION_ROUTE_WITH_ARG
+                NavDestinations.PREPARATION_ROUTE_WITH_ARG,
             )
         val showBottomBar =
             currentRoute != null &&

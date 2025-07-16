@@ -53,6 +53,9 @@ interface RecipeDao {
         newRating: Float,
     )
 
+    @Query("SELECT id, name, imageUrl, category, difficulty, portions, tags, rating, isFavorite FROM recipes WHERE id = :recipeId")
+    fun getRecipeListItemById(recipeId: Int): Flow<RecipeListItem?>
+
     @Transaction
     @Query("SELECT * FROM recipes WHERE id = :recipeId")
     fun getRecipeWithItsUsedIngredientsById(recipeId: Int): Flow<RecipeWithItsUsedIngredients>
