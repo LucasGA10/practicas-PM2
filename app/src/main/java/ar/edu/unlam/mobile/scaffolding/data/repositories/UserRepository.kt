@@ -36,4 +36,6 @@ interface UserRepository {
         userId: Int,
         recipeId: Int,
     ): Result<Unit>
+
+    suspend fun addPointsToUser(pointsToAdd: Int): Result<Unit>
 }

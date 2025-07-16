@@ -42,7 +42,7 @@ class UserRepositoryImpl
                     heightCm = 170f,
                     gender = Gender.MALE,
                     dietGoal = DietGoal.LOSE_WEIGHT,
-                    desiredCalories = 1000.0,
+                    desiredCalories = 950.0,
                     recipeHistory =
                         listOf(
                             CompletedRecipeInfo(
@@ -94,8 +94,8 @@ class UserRepositoryImpl
                                 completionDate = dateFormat.format(Date(now - dayInMillis * 6 - hourInMillis * 5)),
                             ),
                         ),
-                    points = 360,
-                    level = 4,
+                    points = 2900,
+                    level = 6,
                 ),
             )
         }
@@ -220,6 +220,51 @@ class UserRepositoryImpl
                     "Receta $recipeId AÑADIDA (permitiendo duplicados) al historial del usuario ${currentUser.id} con fecha '${newEntry.completionDate}'. Nuevo historial: $updatedHistory",
                 )
                 Result.success(Unit)
+            }
+        }
+
+        private fun calculateLevelBasedOnPoints(totalPoints: Int): Int {
+            if (totalPoints < 0) return 1 // Evitar puntos negativos, nivel mínimo 1
+            return (totalPoints / 500) + 1 // Si 0-499 es nivel 1, 500-999 es nivel 2, etc.
+            // floor(totalPoints / 500).toInt() + 1
+        }
+
+        override suspend fun addPointsToUser(pointsToAdd: Int): Result<Unit> {
+            return withContext(ioDispatcher) {
+                val currentUser = _currentUserFlow.value
+                if (currentUser != null) {
+                    val oldPoints = currentUser.points
+                    val newTotalPoints = oldPoints + pointsToAdd
+                    val newPotentialLevel = calculateLevelBasedOnPoints(newTotalPoints)
+
+                    val updatedUser =
+                        currentUser.copy(
+                            points = newTotalPoints,
+                            level = newPotentialLevel, // Actualizar el nivel
+                        )
+                    // --- FIN LÓGICA DE NIVEL ---
+
+                    val index = users.indexOfFirst { it.id == currentUser.id }
+                    if (index != -1) {
+                        users[index] = updatedUser
+                        _currentUserFlow.value = updatedUser // Actualizar el StateFlow
+                        Log.d(
+                            "UserRepositoryImpl",
+                            "Puntos actualizados para usuario ${currentUser.id}. Total: ${updatedUser.points}. Nivel: ${updatedUser.level}",
+                        )
+                        if (newPotentialLevel > currentUser.level) {
+                            Log.i("UserRepositoryImpl", "¡Usuario ${currentUser.id} subió al nivel $newPotentialLevel!")
+                            // Aquí podrías emitir un evento si quieres notificar de forma especial el "Level Up"
+                        }
+                        Result.success(Unit)
+                    } else {
+                        Log.e("UserRepositoryImpl", "Usuario ${currentUser.id} no encontrado en la lista para actualizar puntos.")
+                        Result.failure(Exception("Usuario no encontrado en la lista para actualizar puntos."))
+                    }
+                } else {
+                    Log.e("UserRepositoryImpl", "No hay usuario actual para añadir puntos.")
+                    Result.failure(Exception("No hay usuario logueado para añadir puntos."))
+                }
             }
         }
     }
