@@ -204,7 +204,23 @@ fun DietFormScreen(
                         modifier = Modifier.fillMaxWidth(), // Ocupa el ancho completo
                     )
                 }
-                item { Spacer(modifier = Modifier.height(24.dp)) } // Más espacio antes de la caja de restricciones
+                if (uiState.showDesiredCaloriesField) {
+                    item { Spacer(modifier = Modifier.height(16.dp)) }
+                    item {
+                        OutlinedTextField(
+                            value = uiState.desiredCalories,
+                            onValueChange = { viewModel.onEvent(DietFormEvent.DesiredCaloriesChanged(it)) },
+                            label = { Text("${uiState.desiredCaloriesLabel} (por dia)") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            shape = RoundedCornerShape(8.dp),
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                            isError = uiState.desiredCalories.isNotEmpty() && (uiState.desiredCalories.toDoubleOrNull() == null || uiState.desiredCalories.toDouble() <= 0),
+                        )
+                    }
+                }
+
+                item { Spacer(modifier = Modifier.height(24.dp)) }
 
                 // --- Restricciones Dietéticas ---
                 item {

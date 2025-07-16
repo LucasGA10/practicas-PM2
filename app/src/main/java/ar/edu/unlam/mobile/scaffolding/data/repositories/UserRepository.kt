@@ -6,7 +6,10 @@ import ar.edu.unlam.mobile.scaffolding.domain.model.user.User
 import kotlinx.coroutines.flow.Flow
 
 interface UserRepository {
-    suspend fun loginUser(email: String, password: String): Result<User>
+    suspend fun loginUser(
+        email: String,
+        password: String,
+    ): Result<User>
 
     suspend fun createUser(newUser: User): Result<Unit>
 
@@ -24,6 +27,7 @@ interface UserRepository {
         gender: Gender,
         dietGoal: DietGoal,
         selectedRestrictions: List<String>,
+        desiredCalories: Double,
     ): Result<Unit>
 
     suspend fun addRecipeToHistory(

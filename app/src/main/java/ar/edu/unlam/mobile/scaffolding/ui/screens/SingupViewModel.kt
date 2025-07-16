@@ -6,5 +6,5 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SingupViewModel
-@Inject constructor() : ViewModel() {
-}
+    @Inject
+    constructor() : ViewModel()

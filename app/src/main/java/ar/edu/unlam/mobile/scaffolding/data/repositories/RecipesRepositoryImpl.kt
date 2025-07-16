@@ -39,7 +39,26 @@ class RecipesRepositoryImpl
             }
         }
 
-        override suspend fun getRecipeListItemsByIds(ids: List<Int>): List<RecipeHistoryItem> {
+        override fun getRecipeListItemById(recipeId: Int): Flow<RecipeListItem?> {
+            Log.d("RecipesRepo", "getRecipeListItemById llamado para recipeId: $recipeId")
+            return recipeDao.getRecipeListItemById(recipeId).map { dbItem -> // dbItem es RecipeListItemQueryResult?
+                dbItem?.let {
+                    RecipeListItem(
+                        id = it.id,
+                        name = it.name,
+                        imageUrl = it.imageUrl,
+                        category = it.category,
+                        difficulty = it.difficulty,
+                        portions = it.portions,
+                        tags = it.tags,
+                        rating = it.rating,
+                        isFavorite = it.isFavorite,
+                    )
+                }
+            }
+        }
+
+        override suspend fun getRecipeHistoryItemsByIds(ids: List<Int>): List<RecipeHistoryItem> {
             if (ids.isEmpty()) {
                 return emptyList()
             }

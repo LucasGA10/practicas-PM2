@@ -146,7 +146,7 @@ fun UserProfileHeader(
                     Modifier
                         .align(Alignment.TopEnd)
                         .padding(4.dp)
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), CircleShape),
             ) {
                 Icon(
                     imageVector = Icons.Filled.Edit,
