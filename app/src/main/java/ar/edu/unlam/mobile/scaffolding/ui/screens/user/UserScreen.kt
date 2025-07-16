@@ -83,13 +83,22 @@ fun UserScreen(
                 // Sección de detalles del usuario
                 UserDetailsCard(user = user)
 
-                // Aquí podrías añadir más secciones, como:
-                // - Configuración de la cuenta
-                // - Botón de cerrar sesión
-                // - Enlaces a "Acerca de", "Ayuda", etc.
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp)) // Un poco más de espacio antes de los botones de acción
+
+                // Botón para ir a DietFormScreen
                 Button(
-                    onClick = { /* Lógica para cerrar sesión */ },
+                    onClick = { navController.navigate("dietForm") },
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                ) {
+                    Text("Actualizar Preferencias de Dieta") // O el texto que prefieras
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+                Button(
+                    onClick = { navController.navigate("login") },
                     modifier =
                         Modifier
                             .fillMaxWidth()

@@ -63,9 +63,7 @@ fun DietFormScreen(
 ) {
     val uiState = viewModel.uiState
 
-    val onNavigateBack: (() -> Unit)? = {
-        navController.popBackStack()
-    }
+    val onNavigateBack: (() -> Unit)? = { navController.popBackStack() }
 
     // Si el guardado fue exitoso, llama al callback y resetea el flag
     LaunchedEffect(uiState.saveSuccess) {
@@ -92,7 +90,7 @@ fun DietFormScreen(
         topBar = {
             TopBar(
                 title = "Formulario Dietapp",
-                onNavigateBack = onNavigateBack, // Pasa la acción de retroceso
+                onNavigateBack = onNavigateBack,
                 colors =
                     TopAppBarDefaults.centerAlignedTopAppBarColors(
                         containerColor = MaterialTheme.colorScheme.background.copy(alpha = 0.9f),
@@ -288,7 +286,7 @@ fun DietFormScreen(
                     Text("Guardar")
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp)) // Espacio abajo
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
